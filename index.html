@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lavibee.mx — Formulario de pedido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --peach:#ffe3b3;
+    --pink-mid:#ff8bf0;
+    --pink-hot:#ff5fe0;
+    --pink-pale:#ffe0f5;
+    --magenta:#d6198f;
+    --ink:#1c1418;
+    --card:#ffffff;
+    --card-line:#f3d9ef;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.5), transparent 60%),
+      linear-gradient(180deg, var(--peach) 0%, #ffb4ee 32%, var(--pink-hot) 52%, #ffb8ef 74%, var(--pink-pale) 100%);
+    min-height:100vh;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 18px 60px;}
+
+  /* HERO */
+  .hero{
+    position:relative;
+    padding:56px 20px 40px;
+    text-align:center;
+    overflow:hidden;
+  }
+  .sunburst{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:0; opacity:.55;}
+  .sunburst svg{width:340px;height:340px;}
+  .hero-inner{position:relative; z-index:1;}
+  .eyebrow{
+    font-family:'Poppins',sans-serif;
+    font-weight:800;
+    letter-spacing:.14em;
+    font-size:13px;
+    color:var(--magenta);
+    text-transform:uppercase;
+  }
+  h1.title{
+    font-family:'Playfair Display',serif;
+    font-weight:900;
+    font-size:56px;
+    line-height:.95;
+    margin:6px 0 2px;
+    color:var(--ink);
+  }
+  .subtitle{
+    font-weight:700;
+    letter-spacing:.1em;
+    font-size:12px;
+    color:var(--magenta);
+    text-transform:uppercase;
+  }
+  .hero-note{
+    margin-top:14px;
+    font-size:14px;
+    color:#5c3350;
+    max-width:420px;
+    margin-left:auto;margin-right:auto;
+  }
+
+  /* CARDS */
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-line);
+    border-radius:22px;
+    padding:22px 20px;
+    margin-bottom:16px;
+    box-shadow:0 10px 30px -14px rgba(150,20,120,.25);
+  }
+  .card h2{
+    font-family:'Playfair Display',serif;
+    font-size:22px;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .card .hint{
+    font-size:12.5px;
+    color:#8a6079;
+    margin:0 0 16px;
+  }
+  label.field-label{
+    display:block;
+    font-weight:700;
+    font-size:13px;
+    margin:14px 0 6px;
+    color:#4a2440;
+  }
+  input[type=text], input[type=tel], textarea, select{
+    width:100%;
+    padding:12px 14px;
+    border-radius:14px;
+    border:1.5px solid #f0cdea;
+    background:#fff8fd;
+    font-family:'Poppins',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s;
+  }
+  input[type=text]:focus, input[type=tel]:focus, textarea:focus, select:focus{
+    border-color:var(--pink-hot);
+  }
+  textarea{resize:vertical; min-height:64px;}
+
+  .stepper{
+    display:flex; align-items:center; gap:14px;
+  }
+  .stepper button{
+    width:42px;height:42px;border-radius:50%;
+    border:none;
+    background:var(--ink);
+    color:#fff;
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .stepper button:active{transform:scale(.94);}
+  .stepper .count{
+    font-family:'Playfair Display',serif;
+    font-size:28px;
+    min-width:38px;
+    text-align:center;
+  }
+
+  .toggle-row{display:flex; gap:10px;}
+  .toggle-btn{
+    flex:1;
+    padding:11px 10px;
+    border-radius:14px;
+    border:1.5px solid #f0cdea;
+    background:#fff8fd;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    text-align:center;
+    color:#7a4a6c;
+    transition:all .15s;
+  }
+  .toggle-btn.active{
+    background:linear-gradient(135deg, var(--pink-hot), var(--magenta));
+    color:#fff;
+    border-color:transparent;
+  }
+
+  .radio-opt{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    padding:12px 14px;
+    border-radius:14px;
+    border:1.5px solid #f0cdea;
+    background:#fff8fd;
+    margin-bottom:8px;
+    cursor:pointer;
+  }
+  .radio-opt.active{border-color:var(--pink-hot); background:#fff0fb;}
+  .radio-opt input{margin-top:3px;}
+  .radio-opt .opt-title{font-weight:700; font-size:14px;}
+  .radio-opt .opt-desc{font-size:12px; color:#8a6079; margin-top:2px;}
+
+  /* PIEZA CARDS */
+  .pieza-card{
+    border:1.5px dashed #f0a9e0;
+    border-radius:20px;
+    padding:18px 16px;
+    margin-bottom:16px;
+    background:linear-gradient(180deg,#fffafd,#fff3fb);
+    position:relative;
+  }
+  .pieza-num{
+    position:absolute;
+    top:-16px; left:16px;
+    width:34px;height:34px;
+    border-radius:50%;
+    background:var(--ink);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;
+    font-size:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,.25);
+  }
+  .pieza-card h3{
+    font-family:'Playfair Display',serif;
+    margin:6px 0 10px;
+    font-size:18px;
+    padding-left:34px;
+  }
+
+  .catalog-toggle-row{
+    display:flex;
+    gap:14px;
+    margin-top:4px;
+    flex-wrap:wrap;
+  }
+  .catalog-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    font-weight:700;
+    color:var(--magenta);
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:4px 0;
+    text-decoration:underline;
+  }
+  .catalog-img{
+    width:100%;
+    border-radius:14px;
+    margin-top:8px;
+    display:none;
+    border:1.5px solid #f0cdea;
+  }
+  .catalog-img.show{display:block;}
+
+  .upload-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:6px;
+  }
+  .upload-grid.single{grid-template-columns:1fr;}
+  .upload-box{
+    border:1.5px dashed #e59bd0;
+    border-radius:14px;
+    padding:14px 10px;
+    text-align:center;
+    background:#fff;
+    cursor:pointer;
+    position:relative;
+    min-height:110px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .upload-box span.lbl{font-size:12px; font-weight:700; color:#7a4a6c; margin-bottom:6px;}
+  .upload-box img{max-width:100%; max-height:80px; border-radius:8px; object-fit:cover;}
+  .upload-box input[type=file]{
+    position:absolute; inset:0; opacity:0; cursor:pointer;
+  }
+  .upload-box .plus{font-size:22px; color:#d68fc0;}
+
+  .submit-btn{
+    width:100%;
+    padding:16px;
+    border:none;
+    border-radius:18px;
+    background:linear-gradient(135deg, var(--pink-hot), var(--magenta));
+    color:#fff;
+    font-family:'Playfair Display',serif;
+    font-weight:900;
+    font-size:20px;
+    cursor:pointer;
+    box-shadow:0 12px 24px -10px rgba(214,25,143,.6);
+  }
+  .submit-btn:active{transform:translateY(1px);}
+
+  .summary{
+    display:none;
+    white-space:pre-wrap;
+    font-family:'Poppins',sans-serif;
+    font-size:13.5px;
+    background:#fff8fd;
+    border:1.5px solid #f0cdea;
+    border-radius:14px;
+    padding:14px;
+    line-height:1.6;
+    color:#3a1e33;
+  }
+  .summary.show{display:block; margin-top:14px;}
+
+  .btn-row{display:flex; gap:10px; margin-top:12px;}
+  .btn-row.hide{display:none;}
+  .small-btn{
+    flex:1;
+    padding:12px;
+    border-radius:14px;
+    border:1.5px solid var(--magenta);
+    background:#fff;
+    color:var(--magenta);
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    text-decoration:none;
+    text-align:center;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .small-btn.whatsapp{
+    background:#25D366;
+    border-color:#25D366;
+    color:#fff;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-size:12px;
+    color:#8a6079;
+    margin-top:24px;
+    line-height:1.6;
+  }
+  .footer-note b{color:var(--magenta);}
+
+  /* OPCIONES DE EMPAQUE */
+  .opcion-card{
+    border:1.5px solid #f0cdea;
+    border-radius:16px;
+    padding:14px 14px;
+    margin-bottom:10px;
+    cursor:pointer;
+    background:#fff8fd;
+    transition:all .15s;
+  }
+  .opcion-card.active{
+    border-color:var(--pink-hot);
+    background:#fff0fb;
+    box-shadow:0 6px 16px -8px rgba(214,25,143,.35);
+  }
+  .opcion-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .opcion-top .opcion-nombre{
+    font-family:'Playfair Display',serif;
+    font-size:17px;
+    font-weight:700;
+  }
+  .opcion-price{
+    font-weight:800;
+    font-size:14px;
+    color:var(--magenta);
+    white-space:nowrap;
+  }
+  .opcion-incluye{
+    font-size:12.5px;
+    color:#7a4a6c;
+    margin-top:6px;
+    line-height:1.6;
+  }
+  .opcion-nota{
+    font-size:11.5px;
+    color:#b3557f;
+    margin-top:6px;
+    font-style:italic;
+  }
+  .opcion-precios{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  .precio-pill{
+    font-size:12px;
+    font-weight:700;
+    padding:5px 10px;
+    border-radius:100px;
+    background:#f6dcef;
+    color:#8a4577;
+  }
+  .precio-pill.current{
+    background:linear-gradient(135deg, var(--pink-hot), var(--magenta));
+    color:#fff;
+  }
+
+  .required{color:var(--magenta);}
+  .error{border-color:#e63946 !important;}
+  .error-msg{color:#e63946; font-size:11.5px; margin-top:4px; display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="sunburst">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#ffffff" stroke-width="5" stroke-linecap="round">
+          <line x1="100" y1="6" x2="100" y2="34"/>
+          <line x1="100" y1="166" x2="100" y2="194"/>
+          <line x1="6" y1="100" x2="34" y2="100"/>
+          <line x1="166" y1="100" x2="194" y2="100"/>
+          <line x1="34" y1="34" x2="53" y2="53"/>
+          <line x1="147" y1="147" x2="166" y2="166"/>
+          <line x1="166" y1="34" x2="147" y2="53"/>
+          <line x1="34" y1="166" x2="53" y2="147"/>
+        </g>
+      </svg>
+    </div>
+    <div class="hero-inner">
+      <div class="eyebrow">lavibee.mx</div>
+      <h1 class="title">Pedido</h1>
+      <div class="subtitle">Formulario de personalización</div>
+      <p class="hero-note">Llena tus datos y las piezas que quieres. Al final te armamos el resumen para enviarlo por WhatsApp 💌</p>
+    </div>
+  </div>
+
+  <form id="pedidoForm">
+
+    <!-- DATOS GENERALES -->
+    <div class="card">
+      <h2>Tus datos</h2>
+      <p class="hint">Para saber a quién le armamos el pedido.</p>
+
+      <label class="field-label">Nombre <span class="required">*</span></label>
+      <input type="text" id="nombre" placeholder="Tu nombre completo" required>
+      <div class="error-msg" id="err-nombre">Escribe tu nombre porfa 🤍</div>
+
+      <label class="field-label">Número de piezas <span class="required">*</span></label>
+      <div class="stepper">
+        <button type="button" id="menos">−</button>
+        <div class="count" id="countDisplay">1</div>
+        <button type="button" id="mas">+</button>
+      </div>
+    </div>
+
+    <!-- PIEZAS DINAMICAS -->
+    <div id="piezasContainer"></div>
+
+    <!-- OPCIONES DE EMPAQUE -->
+    <div class="card">
+      <h2>Opción de empaque</h2>
+      <p class="hint">El precio se ajusta solo según tu número de piezas.</p>
+      <div id="opcionesContainer"></div>
+      <div class="error-msg" id="err-opcion">Elige una opción de empaque 🤍</div>
+    </div>
+
+    <!-- ENTREGA -->
+    <div class="card">
+      <h2>Entrega</h2>
+      <p class="hint">¿Cómo te lo hacemos llegar?</p>
+
+      <div class="radio-opt" data-entrega="punto">
+        <input type="radio" name="entrega" value="Recoger en punto de entrega" id="entrega1">
+        <div>
+          <div class="opt-title">Recoger en punto de entrega</div>
+          <div class="opt-desc">Coordinamos un lugar y hora para verte.</div>
+        </div>
+      </div>
+      <div class="radio-opt" data-entrega="didi">
+        <input type="radio" name="entrega" value="Entrega con Didi" id="entrega2">
+        <div>
+          <div class="opt-title">Entrega con Didi</div>
+          <div class="opt-desc">Se envía por Didi a tu domicilio.</div>
+        </div>
+      </div>
+
+      <div id="direccionWrap" style="display:none;">
+        <label class="field-label">Dirección de entrega <span class="required">*</span></label>
+        <textarea id="direccion" placeholder="Calle, número, colonia, referencias..."></textarea>
+        <div class="error-msg" id="err-direccion">Por favor ingresa tu dirección 🤍</div>
+      </div>
+      <div class="error-msg" id="err-entrega">Elige una opción de entrega 🤍</div>
+    </div>
+
+
+    <button type="submit" class="submit-btn">Generar resumen ✨</button>
+
+    <div class="summary" id="resumenBox"></div>
+    <div class="btn-row hide" id="btnRow">
+      <button type="button" class="small-btn" id="copiarBtn">Copiar resumen</button>
+      <a class="small-btn whatsapp" id="waBtn" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+    </div>
+
+    <p class="footer-note" id="fotoNote" style="display:none;">
+      📸 <b>No olvides adjuntar tus fotos</b> en el chat de WhatsApp después de enviar este resumen — el formulario no puede mandarlas automáticamente.
+    </p>
+
+  </form>
+
+  <p class="footer-note">
+    Dudas o catálogo completo: <b>Facebook @Vibe Sweet</b> · <b>Instagram @lavibee.mx</b>
+  </p>
+
+</div>
+
+<script>
+// ==========================================
+// CONFIGURACIÓN: CAMBIA ESTO CON TU NÚMERO
+// ==========================================
+const WHATSAPP_NUMBER = "520000000000"; // Agrega aquí tu lada (52) + 10 dígitos sin espacios
+
+// Datos de empaque estáticos
+const opcionesEmpaque = [
+  {
+    id: "plata",
+    nombre: "Plata",
+    precios: { 1: 180, 2: 320, 3: 450, 4: 560 },
+    precioExtra: 130,
+    incluye: "Caja de regalo tradicional lavibee, listón satinado, tarjetita dedicatoria mini, viruta de papel, sticker de cerrado.",
+    nota: "*Todas tus piezas van dentro de la misma caja."
+  },
+  {
+    id: "oro",
+    nombre: "Oro",
+    precios: { 1: 220, 2: 380, 3: 520, 4: 640 },
+    precioExtra: 150,
+    incluye: "Caja premium rígida imantada, listón satinado ancho, sobre con dedicatoria formal, fotos impresas extras tipo polaroide de regalo, viruta premium, aroma exclusivo lavibee.",
+    nota: "*Paquete ideal para un regalo inolvidable."
+  }
+];
+
+let totalPiezas = 1;
+let empaqueSeleccionado = null;
+let entregaSeleccionada = null;
+let textoGlobalResumen = "";
+
+// Nodos principales
+const countDisplay = document.getElementById('countDisplay');
+const piezasContainer = document.getElementById('piezasContainer');
+const opcionesContainer = document.getElementById('opcionesContainer');
+const direccionWrap = document.getElementById('direccionWrap');
+const direccionInput = document.getElementById('direccion');
+const pedidoForm = document.getElementById('pedidoForm');
+const resumenBox = document.getElementById('resumenBox');
+const btnRow = document.getElementById('btnRow');
+const waBtn = document.getElementById('waBtn');
+const copiarBtn = document.getElementById('copiarBtn');
+const fotoNote = document.getElementById('fotoNote');
+
+// Inicialización
+document.addEventListener("DOMContentLoaded", () => {
+  renderPiezas();
+  renderEmpaques();
+  setupEntrega();
+});
+
+// Eventos del Stepper
+document.getElementById('mas').addEventListener('click', () => {
+  if(totalPiezas < 10) {
+    totalPiezas++;
+    countDisplay.textContent = totalPiezas;
+    renderPiezas();
+    renderEmpaques();
+  }
+});
+
+document.getElementById('menos').addEventListener('click', () => {
+  if(totalPiezas > 1) {
+    totalPiezas--;
+    countDisplay.textContent = totalPiezas;
+    renderPiezas();
+    renderEmpaques();
+  }
+});
+
+// Renderizar Piezas Dinámicas
+function renderPiezas() {
+  const actuales = piezasContainer.querySelectorAll('.pieza-card').length;
+  
+  if (actuales < totalPiezas) {
+    for (let i = actuales + 1; i <= totalPiezas; i++) {
+      const pCard = document.createElement('div');
+      pCard.className = 'pieza-card';
+      pCard.id = `pieza-${i}`;
+      pCard.innerHTML = `
+        <div class="pieza-num">${i}</div>
+        <h3>Configuración de la Pieza</h3>
+        
+        <label class="field-label">Modelo del Reloj / Accesorio <span class="required">*</span></label>
+        <select class="modelo-select" required>
+          <option value="" disabled selected>Selecciona un modelo...</option>
+          <option value="Reloj Vintage Oro">Reloj Vintage Oro</option>
+          <option value="Reloj Vintage Plata">Reloj Vintage Plata</option>
+          <option value="Reloj Minimalista Negro">Reloj Minimalista Negro</option>
+          <option value="Llavero Premium Acero">Llavero Premium Acero</option>
+        </select>
+
+        <label class="field-label">Texto de Fondo (Frase, fecha o nombres)</label>
+        <input type="text" class="texto-fondo" placeholder="Ej: Te amo 23-11-24 / Siempre juntos">
+
+        <label class="field-label">¿Lleva fotografía? <span class="required">*</span></label>
+        <div class="toggle-row">
+          <button type="button" class="toggle-btn active" data-value="Sí">Sí</button>
+          <button type="button" class="toggle-btn" data-value="No">No</button>
+        </div>
+      `;
+      piezasContainer.appendChild(pCard);
+      setupPiezaEvents(pCard);
+    }
+  } else if (actuales > totalPiezas) {
+    for (let i = actuales; i > totalPiezas; i--) {
+      const el = document.getElementById(`pieza-${i}`);
+      if (el) el.remove();
+    }
+  }
+}
+
+function setupPiezaEvents(card) {
+  const buttons = card.querySelectorAll('.toggle-row .toggle-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
+
+// Calcular precio dinámico de empaques
+function calcularPrecioEmpaque(opcion) {
+  if (opcion.precios[totalPiezas]) {
+    return opcion.precios[totalPiezas];
+  } else {
+    const base4 = opcion.precios[4];
+    const extras = totalPiezas - 4;
+    return base4 + (extras * opcion.precioExtra);
+  }
+}
+
+// Renderizar Opciones de Empaque
+function renderEmpaques() {
+  opcionesContainer.innerHTML = "";
+  opcionesEmpaque.forEach(opc => {
+    const precioActual = calcularPrecioEmpaque(opc);
+    
+    const div = document.createElement('div');
+    div.className = `opcion-card ${empaqueSeleccionado === opc.id ? 'active' : ''}`;
+    div.dataset.id = opc.id;
+    
+    let pillsHTML = '';
+    for(let k=1; k<=4; k++) {
+      pillsHTML += `<span class="precio-pill ${totalPiezas === k ? 'current' : ''}">${k} pz: $${opc.precios[k]}</span>`;
+    }
+    if (totalPiezas > 4) {
+      pillsHTML += `<span class="precio-pill current">${totalPiezas} pz: $${precioActual}</span>`;
+    }
+
+    div.innerHTML = `
+      <div class="opcion-top">
+        <span class="opcion-nombre">Paquete ${opc.nombre}</span>
+        <span class="opcion-price">$${precioActual} MXN</span>
+      </div>
+      <div class="opcion-incluye">${opc.incluye}</div>
+      <div class="opcion-nota">${opc.nota}</div>
+      <div class="opcion-precios">${pillsHTML}</div>
+    `;
+
+    div.addEventListener('click', () => {
+      empaqueSeleccionado = opc.id;
+      document.querySelectorAll('.opcion-card').forEach(c => c.classList.remove('active'));
+      div.classList.add('active');
+      document.getElementById('err-opcion').style.display = 'none';
+    });
+
+    opcionesContainer.appendChild(div);
+  });
+}
+
+// Configurar sección de Entrega
+function setupEntrega() {
+  const opts = document.querySelectorAll('.radio-opt');
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      opts.forEach(o => {
+        o.classList.remove('active');
+        o.querySelector('input').checked = false;
+      });
+      
+      opt.classList.add('active');
+      const input = opt.querySelector('input');
+      input.checked = true;
+      entregaSeleccionada = opt.dataset.entrega;
+      
+      document.getElementById('err-entrega').style.display = 'none';
+
+      if (entregaSeleccionada === 'didi') {
+        direccionWrap.style.display = 'block';
+        direccionInput.setAttribute('required', 'required');
+      } else {
+        direccionWrap.style.display = 'none';
+        direccionInput.removeAttribute('required');
+        direccionInput.classList.remove('error');
+        document.getElementById('err-direccion').style.display = 'none';
+      }
+    });
+  });
+}
+
+// Procesar envío y generar resumen
+pedidoForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  let valid = true;
+
+  // Validar Nombre
+  const nombre = document.getElementById('nombre').value.trim();
+  if(!nombre) {
+    document.getElementById('nombre').classList.add('error');
+    document.getElementById('err-nombre').style.display = 'block';
+    valid = false;
+  } else {
+    document.getElementById('nombre').classList.remove('error');
+    document.getElementById('err-nombre').style.display = 'none';
+  }
+
+  // Validar Opcion Empaque
+  if(!empaqueSeleccionado) {
+    document.getElementById('err-opcion').style.display = 'block';
+    valid = false;
+  }
+
+  // Validar Entrega
+  if(!entregaSeleccionada) {
+    document.getElementById('err-entrega').style.display = 'block';
+    valid = false;
+  }
+
+  // Validar Dirección si es Didi
+  if(entregaSeleccionada === 'didi' && !direccionInput.value.trim()) {
+    direccionInput.classList.add('error');
+    document.getElementById('err-direccion').style.display = 'block';
+    valid = false;
+  } else {
+    direccionInput.classList.remove('error');
+    document.getElementById('err-direccion').style.display = 'none';
+  }
+
+  if(!valid) return;
+
+  // Construcción del Resumen de Texto
+  let resumen = `✨ *NUEVO PEDIDO LAVIBEE.MX* ✨\n\n`;
+  resumen += `👤 *Cliente:* ${nombre}\n`;
+  resumen += `📦 *Total de piezas:* ${totalPiezas}\n\n`;
+
+  let contieneFotos = false;
+  const cards = piezasContainer.querySelectorAll('.pieza-card');
+  cards.forEach((card, idx) => {
+    const num = idx + 1;
+    const modelo = card.querySelector('.modelo-select').value;
+    const texto = card.querySelector('.texto-fondo').value.trim() || 'Ninguno';
+    const foto = card.querySelector('.toggle-row .toggle-btn.active').dataset.value;
+
+    if(foto === 'Sí') contieneFotos = true;
+
+    resumen += `*Pieza #${num}*\n`;
+    resumen += `• Modelo: ${modelo}\n`;
+    resumen += `• Texto de fondo: ${texto}\n`;
+    resumen += `• ¿Lleva foto?: ${foto}\n\n`;
+  });
+
+  const datosEmpaque = opcionesEmpaque.find(o => o.id === empaqueSeleccionado);
+  const precioFinalEmpaque = calcularPrecioEmpaque(datosEmpaque);
+  resumen += `🎁 *Empaque elegido:* Paquete ${datosEmpaque.nombre} ($${precioFinalEmpaque} MXN)\n`;
+  
+  const tipoEntrega = document.querySelector('input[name="entrega"]:checked').value;
+  resumen += `📍 *Método de entrega:* ${tipoEntrega}\n`;
+  
+  if(entregaSeleccionada === 'didi') {
+    resumen += `🏠 *Dirección:* ${direccionInput.value.trim()}\n`;
+  }
+
+  textoGlobalResumen = resumen;
+
+  // Mostrar Resumen en Pantalla
+  resumenBox.textContent = resumen;
+  resumenBox.classList.add('show');
+  btnRow.classList.remove('hide');
+
+  if(contieneFotos) {
+    fotoNote.style.display = 'block';
+  } else {
+    fotoNote.style.display = 'none';
+  }
+
+  // Configurar enlace directo de WhatsApp
+  const mensajeCodificado = encodeURIComponent(resumen);
+  waBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensajeCodificado}`;
+});
+
+// Botón Copiar al Portapapeles
+copiarBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(textoGlobalResumen).then(() => {
+    alert("¡Resumen copiado con éxito! Puedes pegarlo en tu chat.");
+  }).catch(err => {
+    alert("Hubo un error al copiar el texto automáticamente.");
+  });
+});
+</script>
+</body>
+</html>
+
+```
