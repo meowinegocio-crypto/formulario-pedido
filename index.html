@@ -740,16 +740,6 @@ let selectedOpcion = null;
 const countDisplay = document.getElementById('countDisplay');
 const piezasContainer = document.getElementById('piezasContainer');
 
-function escapeHtml(text) {
-  if (!text) return '';
-  return String(text)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 function modeloOptions(n, prefix){
   let opts = '<option value="">Selecciona…</option>';
   for(let i=1;i<=n;i++){
@@ -984,11 +974,10 @@ document.getElementById('toggleImgLlavero').addEventListener('click', function()
   this.textContent = showing ? 'Ocultar fotos de referencia' : 'Ver fotos de referencia / ejemplos';
 });
 
-// INICIALIZAR
 renderPiezas();
 renderOpciones();
 
-// FORM SUBMIT Y CÁLCULOS
+// SUBMIT Y ENVÍO A GOOGLE SHEETS
 document.getElementById('pedidoForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
@@ -1069,29 +1058,25 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e) {
   let costoEncapTotal = piezasConEncap * 20;
   let costoLlavero = 0;
   let resumenLlaveroTxt = "";
-  let notasArray = [];
 
   const checkLlavero = document.getElementById('checkLlavero');
-  if (checkLlavero && checkLlavero.checked) {
-    costoLlavero = 130;
-    const tipoLlavero = document.getElementById('tipoLlavero').value;
-    let detalleLlavero = "";
-    if (tipoLlavero === 'Álbum Musical') {
-      detalleLlavero = document.getElementById('detalleAlbumInput').value.trim() || 'Sin especificar';
-    } else {
-      detalleLlavero = 'Fotos personalizadas mandadas por WhatsApp';
-    }
-    resumenLlaveroTxt = `\nLlavero: Llavero de disco ($130 MXN)\n  · Tipo: ${tipoLlavero}\n  · Detalle: ${detalleLlavero}`;
-    notasArray.push(`Llavero Disco ($130): ${tipoLlavero} - ${detalleLlavero}`);
-  }
+  const tieneLlavero = checkLlavero && checkLlavero.checked;
+  let tipoLlavero = "";
+  let detalleLlavero = "";
 
-  if (piezasConEncap > 0) {
-    notasArray.push(`Encapsulado (${piezasConEncap} pza): $${costoEncapTotal} MXN`);
+  if (tieneLlavero) {
+    costoLlavero = 130;
+    tipoLlavero = document.getElementById('tipoLlavero').value;
+    detalleLlavero = (tipoLlavero === 'Álbum Musical') 
+      ? (document.getElementById('detalleAlbumInput').value.trim() || 'Sin especificar')
+      : 'Fotos personalizadas mandadas por WhatsApp';
+
+    resumenLlaveroTxt = `\nLlavero: Llavero de disco ($130 MXN)\n  · Tipo: ${tipoLlavero}\n  · Detalle: ${detalleLlavero}`;
   }
 
   let totalFinal = totalBase + costoEncapTotal + costoLlavero;
 
-  // ARMAR TEXTO COMPLETO DEL RESUMEN
+  // RESUMEN TEXTO WHATSAPP
   let resumenTexto = `✨ PEDIDO LAVIBEE.MX ✨
 Nombre: ${nombreVal}
 Número de piezas: ${count}
@@ -1123,21 +1108,41 @@ $${totalFinal} MXN`;
   const waMessage = encodeURIComponent(resumenTexto);
   document.getElementById('waBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
 
-  // ENVIAR A GOOGLE SHEETS
-  const payload = {
-    opcion: `${opcionObj.nombre} - ${count} pieza${count > 1 ? 's' : ''}`,
+  // ENVIAR A GOOGLE SHEETS (Se dividen los datos en filas separadas si se incluyó llavero)
+  const envios = [];
+
+  // Fila 1: Paquete + Encapsulado (Columna H recibe costoEncapTotal)
+  const totalCobradoPaquete = totalBase + costoEncapTotal;
+  const nombreOpcionVentas = `${opcionObj.nombre} - ${count} pieza${count > 1 ? 's' : ''}`;
+
+  envios.push({
+    opcion: nombreOpcionVentas,
     cliente: nombreVal,
     entrega: entregaTexto,
-    total: totalFinal,
-    notas: notasArray.join(' | ')
-  };
+    totalCobrado: totalCobradoPaquete,
+    costoExtraEncap: costoEncapTotal
+  });
 
-  fetch(SHEET_WEBHOOK_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }).catch(err => console.error("Error al registrar venta:", err));
+  // Fila 2: Kit Disco/Llavero mini CD (Coincide exacto con la fila 13 de la pestaña "Paquetes")
+  if (tieneLlavero) {
+    envios.push({
+      opcion: "Kit Disco/Llavero mini CD",
+      cliente: nombreVal,
+      entrega: "Mismo pedido de " + nombreVal,
+      totalCobrado: 130,
+      costoExtraEncap: 0
+    });
+  }
+
+  // Petición al Script por cada elemento
+  envios.forEach(item => {
+    fetch(SHEET_WEBHOOK_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    }).catch(err => console.error("Error al registrar venta:", err));
+  });
 });
 
 document.getElementById('copiarBtn').addEventListener('click', function() {
