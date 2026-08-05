@@ -226,31 +226,6 @@
   }
   .catalog-img.show{display:block;}
 
-  .upload-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-top:6px;
-  }
-  .upload-grid.single{grid-template-columns:1fr;}
-  .upload-box{
-    border:1.5px dashed #e59bd0;
-    border-radius:14px;
-    padding:14px 10px;
-    text-align:center;
-    background:#fff;
-    cursor:pointer;
-    position:relative;
-    min-height:110px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-  }
-  .upload-box span.lbl{font-size:12px; font-weight:700; color:#7a4a6c; margin-bottom:6px;}
-  .upload-box img{max-width:100%; max-height:80px; border-radius:8px; object-fit:cover;}
-  .upload-box input[type=file]{
-    position:absolute; inset:0; opacity:0; cursor:pointer;
-  }
-  .upload-box .plus{font-size:22px; color:#d68fc0;}
-
   .submit-btn{
     width:100%;
     padding:16px;
@@ -337,12 +312,6 @@
     font-size:17px;
     font-weight:700;
   }
-  .opcion-price{
-    font-weight:800;
-    font-size:14px;
-    color:var(--magenta);
-    white-space:nowrap;
-  }
   .opcion-incluye{
     font-size:12.5px;
     color:#7a4a6c;
@@ -361,6 +330,7 @@
     flex-wrap:wrap;
     margin-top:8px;
   }
+
   .precio-pill{
     font-size:12px;
     font-weight:700;
@@ -525,6 +495,37 @@
       <div class="error-msg" id="err-opcion">Elige una opción de empaque 🤍</div>
     </div>
 
+    <!-- SECCIÓN LLAVERO DE DISCO -->
+    <div class="card">
+      <h2>Llavero de disco ($130 MXN)</h2>
+      <p class="hint">Agrega un llavero inspirado en el álbum de tu artista favorito o personalizado con tus fotos.</p>
+      
+      <label class="radio-opt" style="cursor:pointer;">
+        <input type="checkbox" id="checkLlavero" onchange="toggleLlaveroOptions()">
+        <div>
+          <div class="opt-title">¡Sí! Quiero agregar un llavero de disco (+$130 MXN)</div>
+          <div class="opt-desc">Álbum a elegir o fotos personalizadas.</div>
+        </div>
+      </label>
+
+      <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
+        <label class="field-label">Tipo de diseño</label>
+        <select id="tipoLlavero" onchange="toggleDetalleLlavero()">
+          <option value="Álbum Musical">Álbum de un artista / canción</option>
+          <option value="Personalizado con Fotos">Personalizado con mis propias fotos</option>
+        </select>
+
+        <div id="campoDetalleAlbum" style="margin-top:10px;">
+          <label class="field-label">¿De qué artista y álbum/canción te gustaría?</label>
+          <input type="text" id="detalleAlbumInput" placeholder="Ej: Bad Bunny - Un Verano Sin Ti">
+        </div>
+
+        <div id="campoDetalleFotos" style="display:none; margin-top:10px;">
+          <p class="hint" style="margin:0;">📸 Recuerda mandar las fotos para tu llavero por WhatsApp junto con las de tu pedido.</p>
+        </div>
+      </div>
+    </div>
+
     <!-- POLAROIDS -->
     <div class="card" id="polaroidsWrap" style="display:none;">
       <h2>Polaroids de regalo</h2>
@@ -557,7 +558,6 @@
             <option value="Metro Río de los Remedios">Río de los Remedios</option>
             <option value="Metro Impulsora">Impulsora</option>
             <option value="Metro Nezahualcóyotl">Nezahualcóyotl</option>
-        
           </optgroup>
           <optgroup label="Otro">
             <option value="Plaza Las Américas">Plaza Las Américas</option>
@@ -592,8 +592,6 @@
       <div class="error-msg" id="err-entrega">Elige una opción de entrega 🤍</div>
     </div>
 
-
-
     <button type="submit" class="submit-btn">Generar resumen ✨</button>
 
     <div class="summary" id="resumenBox"></div>
@@ -621,16 +619,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-
-  const PLATA_IMG = "./Plateados.png";
+const PLATA_IMG = "./Plateados.png";
 const ORO_IMG = "./Dorados.png";
-const WHATSAPP_NUMBER = "525621756947"; // <-- cambia esto por tu número con lada de país, ej: 5215512345678
+const WHATSAPP_NUMBER = "525621756947";
 const OPCION1_IMG = "./Paquete 1.png";
 const OPCION2_IMG = "./Paquete 2.png";
 const OPCION3_IMG = "./Paquete 3.png";
 const OPCION4_IMG = "./Paquete 4.png";
 
-  
 let count = 1;
 const MAX_PIEZAS = 10;
 
@@ -743,7 +739,6 @@ function renderPiezas(){
 function priceForCount(opcion, n){
   if(n === 1) return opcion.precio1;
   if(n === 2) return opcion.precio2;
-  // más de 2 piezas: se cotiza sobre el precio de 2 piezas + el extra por pieza adicional
   const extra = opcion.precio2 - opcion.precio1;
   return opcion.precio2 + extra * (n - 2);
 }
@@ -809,7 +804,6 @@ function renderPolaroids(){
 }
 
 function attachPiezaListeners(){
-  // toggle oro/plata
   document.querySelectorAll('.acabado-row').forEach(row=>{
     row.querySelectorAll('.toggle-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -827,7 +821,6 @@ function attachPiezaListeners(){
     });
   });
 
-  // toggle encapsulado
   document.querySelectorAll('.encap-row').forEach(row=>{
     row.querySelectorAll('.toggle-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -837,7 +830,6 @@ function attachPiezaListeners(){
     });
   });
 
-  // catalog toggle (independiente de oro/plata elegido)
   document.querySelectorAll('.catalog-toggle').forEach(btn=>{
     const idx = btn.dataset.idx;
     const cat = btn.dataset.cat;
@@ -849,7 +841,6 @@ function attachPiezaListeners(){
       const otherBtn = document.querySelector(`.catalog-toggle[data-idx="${idx}"][data-cat="${otherCat}"]`);
       const otherLabel = otherCat === 'plata' ? 'plateados' : 'dorados';
 
-      // oculta el otro catálogo si estaba abierto
       otherImg.classList.remove('show');
       otherBtn.textContent = `Ver catálogo ${otherLabel}`;
 
@@ -858,7 +849,6 @@ function attachPiezaListeners(){
     });
   });
 
-  // foto opcion
   document.querySelectorAll('.foto-opt').forEach(opt=>{
     opt.addEventListener('click', ()=>{
       const idx = opt.dataset.idx;
@@ -876,7 +866,6 @@ document.getElementById('mas').addEventListener('click', ()=>{
   if(count<MAX_PIEZAS){ count++; countDisplay.textContent=count; renderPiezas(); renderOpciones(); }
 });
 
-// entrega
 document.querySelectorAll('.radio-opt[data-entrega]').forEach(opt=>{
   opt.addEventListener('click', ()=>{
     document.querySelectorAll('.radio-opt[data-entrega]').forEach(o=>o.classList.remove('active'));
@@ -892,6 +881,28 @@ document.getElementById('puntoEntrega').addEventListener('change', function(){
   document.getElementById('otroLugarWrap').style.display = this.value === 'Otro lugar' ? 'block' : 'none';
   if(this.value) document.getElementById('err-punto').style.display = 'none';
 });
+
+function toggleLlaveroOptions() {
+  const check = document.getElementById('checkLlavero');
+  const divOpciones = document.getElementById('opcionesLlavero');
+  if (check && divOpciones) {
+    divOpciones.style.display = check.checked ? 'block' : 'none';
+  }
+}
+
+function toggleDetalleLlavero() {
+  const select = document.getElementById('tipoLlavero');
+  const campoAlbum = document.getElementById('campoDetalleAlbum');
+  const campoFotos = document.getElementById('campoDetalleFotos');
+  
+  if (select.value === 'Álbum Musical') {
+    campoAlbum.style.display = 'block';
+    campoFotos.style.display = 'none';
+  } else {
+    campoAlbum.style.display = 'none';
+    campoFotos.style.display = 'block';
+  }
+}
 
 renderPiezas();
 renderOpciones();
@@ -978,7 +989,23 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
   const opcionPrecio = priceForCount(opcionElegida, count);
   const ENCAPSULADO_PRICE = 20;
   const encapsuladoCosto = encapsuladoCount * ENCAPSULADO_PRICE;
-  const total = opcionPrecio + encapsuladoCosto;
+
+  const checkLlavero = document.getElementById('checkLlavero');
+  const tieneLlavero = checkLlavero && checkLlavero.checked;
+  const costoLlavero = tieneLlavero ? 130 : 0;
+  
+  let llaveroTxt = 'No incluido';
+  if (tieneLlavero) {
+    const tipo = document.getElementById('tipoLlavero').value;
+    if (tipo === 'Álbum Musical') {
+      const albumInput = document.getElementById('detalleAlbumInput').value.trim();
+      llaveroTxt = `Llavero de disco ($130 MXN)\n  · Tipo: ${tipo}\n  · Detalle: ${albumInput || 'Sin especificar'}`;
+    } else {
+      llaveroTxt = `Llavero de disco ($130 MXN)\n  · Tipo: ${tipo}`;
+    }
+  }
+
+  const total = opcionPrecio + encapsuladoCosto + costoLlavero;
 
   const opcionTxt = `${opcionElegida.nombre} — $${opcionPrecio} MXN\n  · ${opcionElegida.incluye.join('\n  · ')}`;
   const encapsuladoTxt = encapsuladoCount > 0
@@ -998,6 +1025,7 @@ ${piezasTxt.join('\n\n')}
 
 Empaque: ${opcionTxt}
 ${encapsuladoTxt}
+Llavero: ${llaveroTxt}
 Polaroids incluidas: ${opcionElegida.polaroidCount}
 
 Entrega: ${entregaTxt}
@@ -1014,7 +1042,7 @@ TOTAL: $${total} MXN`;
 
   generarTicket({
     nombre, count, piezasTicket, opcionElegida, opcionPrecio,
-    encapsuladoCount, encapsuladoCosto, entregaTxt, total
+    encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, llaveroTxt, entregaTxt, total
   });
 
   box.scrollIntoView({behavior:'smooth', block:'center'});
@@ -1035,7 +1063,7 @@ function ticketLine(label, valor){
 }
 
 function generarTicket(data){
-  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, entregaTxt, total} = data;
+  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, llaveroTxt, entregaTxt, total} = data;
 
   let piezasHTML = '';
   piezasTicket.forEach(p=>{
@@ -1073,6 +1101,7 @@ function generarTicket(data){
     <div class="ticket-block">
       ${ticketLine('ENCAPSULADO' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
     </div>
+    ${tieneLlavero ? `<div class="ticket-block">${ticketLine('LLAVERO DE DISCO', '$' + costoLlavero + ' MXN')}</div>` : ''}
     <div class="ticket-block">
       ENTREGA: ${entregaTxt.replace(/\n/g,'<br>').toUpperCase()}
     </div>
