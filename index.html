@@ -1134,15 +1134,13 @@ $${totalFinal} MXN`;
     });
   }
 
-  // Petición al Script por cada elemento
-  envios.forEach(item => {
-    fetch(SHEET_WEBHOOK_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    }).catch(err => console.error("Error al registrar venta:", err));
-  });
+// Envío completo de los registros en una sola petición
+  fetch(SHEET_WEBHOOK_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(envios)
+  }).catch(err => console.error("Error al registrar venta:", err));
 });
 
 document.getElementById('copiarBtn').addEventListener('click', function() {
