@@ -509,9 +509,11 @@
       </label>
 
       <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
-        <!-- BOTÓN E IMAGEN DE REFERENCIA -->
-        <button type="button" class="catalog-toggle" id="toggleImgLlavero">Ver foto de referencia / ejemplos</button>
-        <img class="catalog-img" id="imgLlaveroRef" src="./DiscosReferencia.png" alt="Ejemplos de llaveros de disco">
+        <!-- BOTÓN E IMÁGENES DE REFERENCIA -->
+        <button type="button" class="catalog-toggle" id="toggleImgLlavero">Ver fotos de referencia / ejemplos</button>
+        <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia1.png" alt="Ejemplo 1 de llaveros de disco">
+        <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia2.png" alt="Ejemplo 2 de llaveros de disco">
+        <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia3.png" alt="Ejemplo 3 de llaveros de disco">
 
         <label class="field-label" style="margin-top:12px;">Tipo de diseño</label>
         <select id="tipoLlavero" onchange="toggleDetalleLlavero()">
@@ -630,7 +632,9 @@ const OPCION1_IMG = "./Paquete 1.png";
 const OPCION2_IMG = "./Paquete 2.png";
 const OPCION3_IMG = "./Paquete 3.png";
 const OPCION4_IMG = "./Paquete 4.png";
-const LLAVERO_REF_IMG = "./DiscosReferencia.png";
+const LLAVERO_REF_IMG_1 = "./DiscosReferencia1.png";
+const LLAVERO_REF_IMG_2 = "./DiscosReferencia2.png";
+const LLAVERO_REF_IMG_3 = "./DiscosReferencia3.png";
 
 let count = 1;
 const MAX_PIEZAS = 10;
@@ -911,11 +915,15 @@ function toggleDetalleLlavero() {
 }
 
 document.getElementById('toggleImgLlavero').addEventListener('click', function() {
-  const img = document.getElementById('imgLlaveroRef');
-  img.classList.toggle('show');
-  this.textContent = img.classList.contains('show') 
-    ? 'Ocultar foto de referencia' 
-    : 'Ver foto de referencia / ejemplos';
+  const imgs = document.querySelectorAll('.imgLlaveroRef');
+  let showing = false;
+  imgs.forEach(img => {
+    img.classList.toggle('show');
+    if (img.classList.contains('show')) showing = true;
+  });
+  this.textContent = showing 
+    ? 'Ocultar fotos de referencia' 
+    : 'Ver fotos de referencia / ejemplos';
 });
 
 renderPiezas();
@@ -1116,9 +1124,6 @@ function generarTicket(data){
       ${ticketLine('ENCAPSULADO' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
     </div>
     ${tieneLlavero ? `<div class="ticket-block">${ticketLine('LLAVERO DE DISCO', '$' + costoLlavero + ' MXN')}</div>` : ''}
-    <div class="ticket-block">
-      ENTREGA: ${entregaTxt.replace(/\n/g,'<br>').toUpperCase()}
-    </div>
     <div class="ticket-stars">********************************</div>
     <div class="ticket-total">TOTAL&nbsp;&nbsp;&nbsp;&nbsp;$${total}.00 MXN</div>
     <div class="ticket-stars">********************************</div>
