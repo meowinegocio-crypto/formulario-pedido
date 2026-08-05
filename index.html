@@ -691,7 +691,6 @@ const OPCION2_IMG = "./Paquete 2.png";
 const OPCION3_IMG = "./Paquete 3.png";
 const OPCION4_IMG = "./Paquete 4.png";
 
-// URL de tu Google Apps Script (el conector que registra las ventas)
 const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyR-dbjognkNjXthtTJ_LIIFbJrrWwLP43MlJhy1o8ciM_svCHOk07DkJIKjUDAffvn/exec";
 
 let count = 1;
@@ -980,269 +979,171 @@ document.getElementById('toggleImgLlavero').addEventListener('click', function()
   let showing = false;
   imgs.forEach(img => {
     img.classList.toggle('show');
-    if (img.classList.contains('show')) showing = true;
+    if(img.classList.contains('show')) showing = true;
   });
   this.textContent = showing ? 'Ocultar fotos de referencia' : 'Ver fotos de referencia / ejemplos';
 });
 
+// INICIALIZAR
 renderPiezas();
 renderOpciones();
 
-// Manda una venta a tu Google Sheet (hoja "Ventas"). No detiene el formulario si falla.
-function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entregaTexto){
-  fetch(SHEET_WEBHOOK_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {"Content-Type": "text/plain"},
-    body: JSON.stringify({
-      opcion: opcionTexto,
-      cliente: nombreCliente,
-      entrega: entregaTexto.replace(/\n/g, " / "),
-      total: totalVenta,
-      notas: notaExtra || ""
-    })
-  }).catch(()=>{});
-}
-
-document.getElementById('pedidoForm').addEventListener('submit', function(e){
+// FORM SUBMIT Y CÁLCULOS
+document.getElementById('pedidoForm').addEventListener('submit', function(e) {
   e.preventDefault();
 
-  let valid = true;
-  const nombre = document.getElementById('nombre').value.trim();
-  document.getElementById('err-nombre').style.display = nombre ? 'none' : 'block';
-  document.getElementById('nombre').classList.toggle('error', !nombre);
-  if(!nombre) valid = false;
+  const nombreInput = document.getElementById('nombre');
+  const nombreVal = nombreInput.value.trim();
+  let isValid = true;
 
-  document.getElementById('err-opcion').style.display = selectedOpcion ? 'none' : 'block';
-  if(!selectedOpcion) valid = false;
-
-  const entregaInput = document.querySelector('input[name="entrega"]:checked');
-  document.getElementById('err-entrega').style.display = entregaInput ? 'none' : 'block';
-  if(!entregaInput) valid = false;
-
-  let direccion = '';
-  let punto = '';
-  if(entregaInput && entregaInput.value === 'Entrega con Didi'){
-    direccion = document.getElementById('direccion').value.trim();
-    document.getElementById('direccion').classList.toggle('error', !direccion);
-    if(!direccion) valid = false;
-  }
-  if(entregaInput && entregaInput.value === 'Recoger en punto de entrega'){
-    punto = document.getElementById('puntoEntrega').value;
-    document.getElementById('err-punto').style.display = punto ? 'none' : 'block';
-    if(!punto) valid = false;
-    if(punto === 'Otro lugar'){
-      const otroLugar = document.getElementById('otroLugar').value.trim();
-      document.getElementById('otroLugar').classList.toggle('error', !otroLugar);
-      document.getElementById('err-otroLugar').style.display = otroLugar ? 'none' : 'block';
-      if(!otroLugar) valid = false;
-      if(otroLugar) punto = `Otro lugar: ${otroLugar}`;
-    }
+  if (!nombreVal) {
+    document.getElementById('err-nombre').style.display = 'block';
+    isValid = false;
+  } else {
+    document.getElementById('err-nombre').style.display = 'none';
   }
 
-  let piezasTxt = [];
-  let piezasTicket = [];
-  let encapsuladoCount = 0;
+  if (!selectedOpcion) {
+    document.getElementById('err-opcion').style.display = 'block';
+    isValid = false;
+  } else {
+    document.getElementById('err-opcion').style.display = 'none';
+  }
 
-  document.querySelectorAll('.pieza-card').forEach(card => {
-    const idx = card.dataset.idx;
-    const acabadoBtn = card.querySelector('.acabado-row .toggle-btn.active');
-    const encapBtn = card.querySelector('.encap-row .toggle-btn.active');
-    const modelo = card.querySelector('.modeloSelect').value;
-    const radioFoto = card.querySelector(`input[name="fotoOpcion${idx}"]:checked`);
+  const entregaOpt = document.querySelector('input[name="entrega"]:checked');
+  if (!entregaOpt) {
+    document.getElementById('err-entrega').style.display = 'block';
+    isValid = false;
+  } else {
+    document.getElementById('err-entrega').style.display = 'none';
+  }
 
-    if(!acabadoBtn || !encapBtn || !modelo || !radioFoto){
-      valid = false;
-      card.style.borderColor = '#e63946';
+  let entregaTexto = "";
+  if (entregaOpt) {
+    if (entregaOpt.value === "Recoger en punto de entrega") {
+      const pSel = document.getElementById('puntoEntrega').value;
+      if (!pSel) {
+        document.getElementById('err-punto').style.display = 'block';
+        isValid = false;
+      } else if (pSel === "Otro lugar") {
+        const otroTxt = document.getElementById('otroLugar').value.trim();
+        if (!otroTxt) {
+          document.getElementById('err-otroLugar').style.display = 'block';
+          isValid = false;
+        } else {
+          entregaTexto = `Punto de entrega: ${otroTxt} (Otro lugar)`;
+        }
+      } else {
+        entregaTexto = `Punto de entrega: ${pSel}`;
+      }
     } else {
-      card.style.borderColor = '';
+      const dirTxt = document.getElementById('direccion').value.trim();
+      entregaTexto = `Didi a domicilio: ${dirTxt}`;
     }
-
-    if(encapBtn && encapBtn.dataset.val === 'Sí') encapsuladoCount++;
-
-    const fotoVal = radioFoto ? radioFoto.value : null;
-    const fotoTxt = fotoVal === 'dos' ? 'Dos fotos (izquierda y derecha distintas)' : (fotoVal === 'una' ? 'Una sola foto' : '—');
-
-    piezasTxt.push(
-`Relicario ${idx}:
-  · Acabado: ${acabadoBtn ? acabadoBtn.dataset.val : '—'}
-  · Modelo: ${modelo || '—'}
-  · Encapsulado: ${encapBtn ? encapBtn.dataset.val : '—'}
-  · Fotos: ${fotoTxt}`);
-
-    piezasTicket.push({
-      idx,
-      acabado: acabadoBtn ? acabadoBtn.dataset.val : '—',
-      modelo: modelo || '—',
-      encap: encapBtn ? encapBtn.dataset.val : '—',
-      fotos: fotoTxt
-    });
-  });
-
-  if(!valid){
-    alert('Falta llenar algunos campos, revisa lo marcado en rojo 💗');
-    return;
   }
 
-  const opcionElegida = PACKAGE_OPTIONS.find(o=>o.id === selectedOpcion);
-  const opcionPrecio = priceForCount(opcionElegida, count);
-  const ENCAPSULADO_PRICE = 20;
-  const encapsuladoCosto = encapsuladoCount * ENCAPSULADO_PRICE;
+  if (!isValid) return;
+
+  const opcionObj = PACKAGE_OPTIONS.find(o => o.id === selectedOpcion);
+  let totalBase = priceForCount(opcionObj, count);
+  let piezasConEncap = 0;
+  let resumenPiezasTxt = "";
+
+  for (let i = 1; i <= count; i++) {
+    const card = document.querySelector(`.pieza-card[data-idx="${i}"]`);
+    const acabadoBtn = card.querySelector('.acabado-row .toggle-btn.active');
+    const modeloSel = card.querySelector('.modeloSelect').value;
+    const encapBtn = card.querySelector('.encap-row .toggle-btn.active');
+    const fotoOpt = card.querySelector(`input[name="fotoOpcion${i}"]:checked`);
+
+    const encapVal = encapBtn ? encapBtn.dataset.val : 'No';
+    if (encapVal === 'Sí') piezasConEncap++;
+
+    resumenPiezasTxt += `\nRelicario ${i}:
+  · Acabado: ${acabadoBtn ? acabadoBtn.dataset.val : 'Sin especificar'}
+  · Modelo: ${modeloSel || 'Sin especificar'}
+  · Encapsulado: ${encapVal}
+  · Fotos: ${fotoOpt ? (fotoOpt.value === 'dos' ? 'Dos fotos (izquierda y derecha distintas)' : 'Una sola foto') : 'Sin especificar'}\n`;
+  }
+
+  let costoEncapTotal = piezasConEncap * 20;
+  let costoLlavero = 0;
+  let resumenLlaveroTxt = "";
+  let notasArray = [];
 
   const checkLlavero = document.getElementById('checkLlavero');
-  const tieneLlavero = checkLlavero && checkLlavero.checked;
-  const costoLlavero = tieneLlavero ? 130 : 0;
-
-  let llaveroTxt = 'No incluido';
-  if (tieneLlavero) {
-    const tipo = document.getElementById('tipoLlavero').value;
-    if (tipo === 'Álbum Musical') {
-      const albumInput = document.getElementById('detalleAlbumInput').value.trim();
-      llaveroTxt = `Llavero de disco ($130 MXN)\n  · Tipo: ${tipo}\n  · Detalle: ${albumInput || 'Sin especificar'}`;
+  if (checkLlavero && checkLlavero.checked) {
+    costoLlavero = 130;
+    const tipoLlavero = document.getElementById('tipoLlavero').value;
+    let detalleLlavero = "";
+    if (tipoLlavero === 'Álbum Musical') {
+      detalleLlavero = document.getElementById('detalleAlbumInput').value.trim() || 'Sin especificar';
     } else {
-      llaveroTxt = `Llavero de disco ($130 MXN)\n  · Tipo: ${tipo}`;
+      detalleLlavero = 'Fotos personalizadas mandadas por WhatsApp';
     }
+    resumenLlaveroTxt = `\nLlavero: Llavero de disco ($130 MXN)\n  · Tipo: ${tipoLlavero}\n  · Detalle: ${detalleLlavero}`;
+    notasArray.push(`Llavero Disco ($130): ${tipoLlavero} - ${detalleLlavero}`);
   }
 
-  const total = opcionPrecio + encapsuladoCosto + costoLlavero;
+  if (piezasConEncap > 0) {
+    notasArray.push(`Encapsulado (${piezasConEncap} pza): $${costoEncapTotal} MXN`);
+  }
 
-  const opcionTxt = `${opcionElegida.nombre} — $${opcionPrecio} MXN\n  · ${opcionElegida.incluye.join('\n  · ')}`;
-  const encapsuladoTxt = encapsuladoCount > 0
-    ? `Encapsulado (${encapsuladoCount} pieza${encapsuladoCount>1?'s':''}): $${ENCAPSULADO_PRICE} c/u = $${encapsuladoCosto} MXN`
-    : 'Sin encapsulado';
+  let totalFinal = totalBase + costoEncapTotal + costoLlavero;
 
-  const entregaTxt = entregaInput.value
-    + (punto ? `\n  Punto: ${punto}` : '')
-    + (direccion ? `\n  Dirección: ${direccion}` : '');
-
-  const resumenRaw =
-`✨ PEDIDO LAVIBEE.MX ✨
-Nombre: ${nombre}
+  // ARMAR TEXTO COMPLETO DEL RESUMEN
+  let resumenTexto = `✨ PEDIDO LAVIBEE.MX ✨
+Nombre: ${nombreVal}
 Número de piezas: ${count}
+${resumenPiezasTxt}
+Empaque: ${opcionObj.nombre} — $${totalBase} MXN
+  ${opcionObj.incluye.map(t => '· ' + t).join('\n  ')}`;
 
-${piezasTxt.join('\n\n')}
+  if (piezasConEncap > 0) {
+    resumenTexto += `\nEncapsulado (${piezasConEncap} pieza${piezasConEncap > 1 ? 's' : ''}): $20 c/u = $${costoEncapTotal} MXN`;
+  }
+  if (resumenLlaveroTxt) {
+    resumenTexto += resumenLlaveroTxt;
+  }
 
-Empaque: ${opcionTxt}
-${encapsuladoTxt}
-Llavero: ${llaveroTxt}
-Polaroids incluidas: ${opcionElegida.polaroidCount}
+  resumenTexto += `\nPolaroids incluidas: ${opcionObj.polaroidCount * count}
 
-Entrega: ${entregaTxt}`;
+Entrega: ${entregaOpt ? entregaOpt.value : ''}
+${entregaTexto}
 
-  const box = document.getElementById('resumenBox');
-  box.innerHTML = `${escapeHtml(resumenRaw)}\n\nTOTAL FINAL:\n<span class="precio-destacado">$${total} MXN</span>`;
-  box.classList.add('show');
+TOTAL FINAL:
+$${totalFinal} MXN`;
+
+  const resumenBox = document.getElementById('resumenBox');
+  resumenBox.innerText = resumenTexto;
+  resumenBox.classList.add('show');
   document.getElementById('btnRow').classList.remove('hide');
   document.getElementById('fotoNote').style.display = 'block';
 
-  const waResumen = `${resumenRaw}\n\nTOTAL: $${total} MXN`;
-  document.getElementById('waBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waResumen)}`;
+  const waMessage = encodeURIComponent(resumenTexto);
+  document.getElementById('waBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
 
-  generarTicket({
-    nombre, count, piezasTicket, opcionElegida, opcionPrecio,
-    encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, llaveroTxt, entregaTxt, total
-  });
+  // ENVIAR A GOOGLE SHEETS
+  const payload = {
+    opcion: `${opcionObj.nombre} - ${count} pieza${count > 1 ? 's' : ''}`,
+    cliente: nombreVal,
+    entrega: entregaTexto,
+    total: totalFinal,
+    notas: notasArray.join(' | ')
+  };
 
-  // === Registro automático en Google Sheets ===
-  const piezasTexto = count === 1 ? "1 pieza" : count + " piezas";
-  registrarVenta(
-    `${opcionElegida.nombre} - ${piezasTexto}`,
-    opcionPrecio + encapsuladoCosto,
-    encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : "",
-    nombre,
-    entregaTxt
-  );
-
-  if(tieneLlavero){
-    registrarVenta(
-      "Kit Disco/Llavero mini CD - 1 pieza",
-      costoLlavero,
-      llaveroTxt.replace(/\n/g, " / "),
-      nombre,
-      entregaTxt
-    );
-  }
-  // === Fin registro automático ===
-
-  box.scrollIntoView({behavior:'smooth', block:'center'});
+  fetch(SHEET_WEBHOOK_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(err => console.error("Error al registrar venta:", err));
 });
 
-document.getElementById('copiarBtn').addEventListener('click', () => {
+document.getElementById('copiarBtn').addEventListener('click', function() {
   const text = document.getElementById('resumenBox').innerText;
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copiarBtn');
-    const original = btn.textContent;
-    btn.textContent = '¡Copiado! ✓';
-    setTimeout(() => { btn.textContent = original; }, 1600);
-  });
-});
-
-function ticketLine(label, valor){
-  return `<div class="ticket-line"><span>${label}</span><span class="dots"></span><span>${valor}</span></div>`;
-}
-
-function generarTicket(data){
-  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, total} = data;
-
-  let piezasHTML = '';
-  piezasTicket.forEach(p => {
-    piezasHTML += `
-      <div class="ticket-block">
-        RELICARIO ${p.idx}:<br>
-        &nbsp;· ACABADO: ${escapeHtml(p.acabado.toUpperCase())}<br>
-        &nbsp;· MODELO: ${escapeHtml(p.modelo.toUpperCase())}<br>
-        ${ticketLine('&nbsp;· ENCAPSULADO: ' + escapeHtml(p.encap.toUpperCase()), p.encap === 'Sí' ? '$20 MXN' : '')}
-        &nbsp;· FOTOS: ${escapeHtml(p.fotos.toUpperCase())}
-      </div>`;
-  });
-
-  const incluyeHTML = opcionElegida.incluye.map(t => `&nbsp;· ${escapeHtml(t.toUpperCase())}`).join('<br>');
-
-  document.getElementById('ticketBox').innerHTML = `
-    <div class="ticket-logo">
-      <div class="lv">La Vibe</div>
-      <div class="tag">COSITAS LINDAS</div>
-    </div>
-    <div class="ticket-title">TICKET DE COMPRA</div>
-    <hr>
-    <div class="ticket-block">
-      ✨ PEDIDO LA VIBE ✨<br>
-      NOMBRE: ${escapeHtml(nombre.toUpperCase())}<br>
-      NÚMERO DE PIEZAS: ${count}
-    </div>
-    <hr>
-    ${piezasHTML}
-    <hr>
-    <div class="ticket-block">
-      ${ticketLine('EMPAQUE: ' + escapeHtml(opcionElegida.nombre.toUpperCase()), '$' + opcionPrecio + ' MXN')}
-      ${incluyeHTML}
-    </div>
-    <div class="ticket-block">
-      ${ticketLine('ENCAPSULADO' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
-    </div>
-    ${tieneLlavero ? `<div class="ticket-block">${ticketLine('LLAVERO DE DISCO', '$' + costoLlavero + ' MXN')}</div>` : ''}
-    <div class="ticket-stars">********************************</div>
-    <div class="ticket-total">TOTAL&nbsp;&nbsp;&nbsp;&nbsp;$${total}.00 MXN</div>
-    <div class="ticket-stars">********************************</div>
-    <div class="ticket-footer">
-      VISIT US!<br>
-      Facebook @Vibe Sweet<br>
-      Instagram @lavibee.mx
-    </div>
-  `;
-
-  document.getElementById('ticketWrap').style.display = 'block';
-}
-
-document.getElementById('descargarTicketBtn').addEventListener('click', () => {
-  const ticket = document.getElementById('ticketBox');
-  html2canvas(ticket, {backgroundColor:'#fbf6ee', scale:2}).then(canvas => {
-    const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
-    a.download = 'ticket-lavibee.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    alert('¡Resumen copiado al portapapeles! 📋');
   });
 });
 </script>
