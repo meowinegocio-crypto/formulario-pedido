@@ -2255,6 +2255,45 @@ Entrega: ${entregaTxt}`;
     encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, llaveroTxt, entregaTxt, total
   });
 
+
+
+javascript
+  // === Registro automático en Google Sheets ===
+  const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyR-dbjognkNjXthtTJ_LIIFbJrrWwLP43MlJhy1o8ciM_svCHOk07DkJIKjUDAffvn/exec";
+
+  function registrarVenta(opcionTexto, totalVenta, notaExtra){
+    fetch(SHEET_WEBHOOK_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "text/plain"},
+      body: JSON.stringify({
+        opcion: opcionTexto,
+        cliente: nombre,
+        entrega: entregaTxt.replace(/\n/g, " / "),
+        total: totalVenta,
+        notas: notaExtra || ""
+      })
+    }).catch(()=>{}); // si falla el internet, no rompe el formulario
+  }
+
+  // Registra el paquete principal (relicarios)
+  const piezasTexto = count === 1 ? "1 pieza" : count + " piezas";
+  registrarVenta(
+    `${opcionElegida.nombre} - ${piezasTexto}`,
+    opcionPrecio + encapsuladoCosto,
+    encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : ""
+  );
+
+  // Si pidió el kit de disco/llavero, se registra como venta aparte
+  if(tieneLlavero){
+    registrarVenta("Kit Disco/Llavero mini CD - 1 pieza", costoLlavero, llaveroTxt.replace(/\n/g, " / "));
+  }
+  // === Fin registro automático ===
+
+
+
+
+  
   box.scrollIntoView({behavior:'smooth', block:'center'});
 });
 
