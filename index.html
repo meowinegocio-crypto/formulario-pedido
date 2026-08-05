@@ -509,7 +509,11 @@
       </label>
 
       <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
-        <label class="field-label">Tipo de diseño</label>
+        <!-- BOTÓN E IMAGEN DE REFERENCIA -->
+        <button type="button" class="catalog-toggle" id="toggleImgLlavero">Ver foto de referencia / ejemplos</button>
+        <img class="catalog-img" id="imgLlaveroRef" src="./DiscosReferencia.png" alt="Ejemplos de llaveros de disco">
+
+        <label class="field-label" style="margin-top:12px;">Tipo de diseño</label>
         <select id="tipoLlavero" onchange="toggleDetalleLlavero()">
           <option value="Álbum Musical">Álbum de un artista / canción</option>
           <option value="Personalizado con Fotos">Personalizado con mis propias fotos</option>
@@ -626,6 +630,7 @@ const OPCION1_IMG = "./Paquete 1.png";
 const OPCION2_IMG = "./Paquete 2.png";
 const OPCION3_IMG = "./Paquete 3.png";
 const OPCION4_IMG = "./Paquete 4.png";
+const LLAVERO_REF_IMG = "./DiscosReferencia.png";
 
 let count = 1;
 const MAX_PIEZAS = 10;
@@ -831,6 +836,7 @@ function attachPiezaListeners(){
   });
 
   document.querySelectorAll('.catalog-toggle').forEach(btn=>{
+    if(btn.id === 'toggleImgLlavero') return;
     const idx = btn.dataset.idx;
     const cat = btn.dataset.cat;
     const label = cat === 'plata' ? 'plateados' : 'dorados';
@@ -903,6 +909,14 @@ function toggleDetalleLlavero() {
     campoFotos.style.display = 'block';
   }
 }
+
+document.getElementById('toggleImgLlavero').addEventListener('click', function() {
+  const img = document.getElementById('imgLlaveroRef');
+  img.classList.toggle('show');
+  this.textContent = img.classList.contains('show') 
+    ? 'Ocultar foto de referencia' 
+    : 'Ver foto de referencia / ejemplos';
+});
 
 renderPiezas();
 renderOpciones();
