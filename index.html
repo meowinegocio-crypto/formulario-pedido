@@ -1006,20 +1006,16 @@ cargarInventario();
 // Costo aproximado del material del encapsulado (resina). Ajusta este número si cambia el costo en tu Excel.
 const COSTO_MATERIAL_ENCAPSULADO = 2.26;
 
-function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entregaTexto, formaPagoVal, costoExtraVal){
+function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal){
   fetch(SHEET_WEBHOOK_URL, {
     method: "POST",
     mode: "no-cors",
     headers: {"Content-Type": "text/plain"},
     body: JSON.stringify({
-      opcion: opcionTexto,
       cliente: nombreCliente,
       entrega: entregaTexto.replace(/\n/g, " / "),
-      total: totalVenta,
-      totalCobrado: totalVenta,
       formaPago: formaPagoVal || "Por definir",
-      costoExtraEncap: costoExtraVal || 0,
-      notas: notaExtra || ""
+      items: itemsVenta
     })
   }).catch(()=>{});
 }
@@ -1171,30 +1167,31 @@ Entrega: ${entregaTxt}`;
     encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, discoCount, llaveroTxt, entregaTxt, total
   });
 
-  // === Registro automático en Google Sheets ===
+// === Registro automático en Google Sheets (Enviado en una sola petición) ===
   const formaPagoVal = document.getElementById('formaPago').value;
   const piezasTexto = count === 1 ? "1 pieza" : count + " piezas";
-  registrarVenta(
-    `${opcionElegida.nombre} - ${piezasTexto}`,
-    opcionPrecio + encapsuladoCosto,
-    encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : "",
-    nombre,
-    entregaTxt,
-    formaPagoVal,
-    encapsuladoCount * COSTO_MATERIAL_ENCAPSULADO
-  );
+
+  const itemsVenta = [
+    {
+      opcion: `${opcionElegida.nombre} - ${piezasTexto}`,
+      total: opcionPrecio + encapsuladoCosto,
+      totalCobrado: opcionPrecio + encapsuladoCosto,
+      costoExtraEncap: encapsuladoCount * COSTO_MATERIAL_ENCAPSULADO,
+      notas: encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : ""
+    }
+  ];
 
   if(tieneLlavero){
-    registrarVenta(
-      `Kit Disco/Llavero mini CD - ${discoPiezasTxt}`,
-      costoLlavero,
-      llaveroTxt.replace(/\n/g, " / "),
-      nombre,
-      entregaTxt,
-      formaPagoVal,
-      0
-    );
+    itemsVenta.push({
+      opcion: `Kit Disco/Llavero mini CD - ${discoPiezasTxt}`,
+      total: costoLlavero,
+      totalCobrado: costoLlavero,
+      costoExtraEncap: 0,
+      notas: llaveroTxt.replace(/\n/g, " / ")
+    });
   }
+
+  registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal);
   // === Fin registro automático ===
 
   pedidoYaEnviado = true;
