@@ -526,6 +526,49 @@
 
   <form id="pedidoForm">
 
+    <!-- ANUNCIO DESTACADO: LLAVERO DE DISCO -->
+    <div class="card" style="border:2px solid var(--pink-hot); background:linear-gradient(180deg,#fff5fd,#fff);">
+      <h2>✨ ¿Quieres un llavero de disco? (desde $130 MXN)</h2>
+      <p class="hint">Antes de armar tu pedido, decide si quieres agregar uno. Inspirado en el álbum de tu artista favorito o personalizado con tus fotos.</p>
+
+      <img class="catalog-img show" src="./DiscosReferencia1.png" alt="Ejemplo 1 de llaveros de disco" style="margin-bottom:8px;">
+      <img class="catalog-img show" src="./DiscosReferencia2.png" alt="Ejemplo 2 de llaveros de disco" style="margin-bottom:8px;">
+      <img class="catalog-img show" src="./DiscosReferencia3.png" alt="Ejemplo 3 de llaveros de disco">
+
+      <label class="radio-opt" style="cursor:pointer; margin-top:14px;" id="llaveroLabel">
+        <input type="checkbox" id="checkLlavero" onchange="toggleLlaveroOptions()">
+        <div>
+          <div class="opt-title">¡Sí! Quiero agregar llavero(s) de disco</div>
+          <div class="opt-desc">$130 MXN cada uno — álbum a elegir o fotos personalizadas.</div>
+        </div>
+      </label>
+
+      <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
+        <label class="field-label" style="margin-top:0;">¿Cuántos discos/llaveros quieres?</label>
+        <div class="stepper">
+          <button type="button" id="discoMenos">−</button>
+          <div class="count" id="discoCountDisplay">1</div>
+          <button type="button" id="discoMas">+</button>
+        </div>
+        <p class="hint" id="discoPrecioHint" style="margin-top:8px;">1 disco/llavero — $130 MXN</p>
+
+        <label class="field-label" style="margin-top:12px;" for="tipoLlavero">Tipo de diseño</label>
+        <select id="tipoLlavero" onchange="toggleDetalleLlavero()">
+          <option value="Álbum Musical">Álbum de un artista / canción</option>
+          <option value="Personalizado con Fotos">Personalizado con mis propias fotos</option>
+        </select>
+
+        <div id="campoDetalleAlbum" style="margin-top:10px;">
+          <label class="field-label" for="detalleAlbumInput">¿De qué artista y álbum/canción te gustaría? (uno por cada disco, sepáralos con coma)</label>
+          <input type="text" id="detalleAlbumInput" placeholder="Ej: Bad Bunny - Un Verano Sin Ti">
+        </div>
+
+        <div id="campoDetalleFotos" style="display:none; margin-top:10px;">
+          <p class="hint" style="margin:0;">📸 Recuerda mandar las fotos para tu(s) llavero(s) por WhatsApp junto con las de tu pedido.</p>
+        </div>
+      </div>
+    </div>
+
     <!-- DATOS GENERALES -->
     <div class="card">
       <h2>Tus datos</h2>
@@ -534,6 +577,13 @@
       <label class="field-label" for="nombre">Nombre <span class="required">*</span></label>
       <input type="text" id="nombre" placeholder="Tu nombre" required>
       <div class="error-msg" id="err-nombre">Escribe tu nombre porfa 🤍</div>
+
+      <label class="field-label" for="formaPago">Forma de pago <span class="required">*</span></label>
+      <select id="formaPago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="Transferencia">Transferencia / Tarjeta</option>
+        <option value="Por definir">Por definir</option>
+      </select>
 
       <label class="field-label">Número de piezas <span class="required">*</span></label>
       <div class="stepper">
@@ -552,50 +602,6 @@
       <p class="hint">El precio se ajusta solo según tu número de piezas.</p>
       <div id="opcionesContainer"></div>
       <div class="error-msg" id="err-opcion">Elige una opción de empaque 🤍</div>
-    </div>
-
-    <!-- SECCIÓN LLAVERO DE DISCO -->
-    <div class="card">
-      <h2>Llavero de disco (desde $130 MXN)</h2>
-      <p class="hint">Agrega uno o varios llaveros inspirados en el álbum de tu artista favorito o personalizados con tus fotos.</p>
-      
-      <label class="radio-opt" style="cursor:pointer;" id="llaveroLabel">
-        <input type="checkbox" id="checkLlavero" onchange="toggleLlaveroOptions()">
-        <div>
-          <div class="opt-title">¡Sí! Quiero agregar llavero(s) de disco</div>
-          <div class="opt-desc">$130 MXN cada uno — álbum a elegir o fotos personalizadas.</div>
-        </div>
-      </label>
-
-      <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
-        <label class="field-label" style="margin-top:0;">¿Cuántos discos/llaveros quieres?</label>
-        <div class="stepper">
-          <button type="button" id="discoMenos">−</button>
-          <div class="count" id="discoCountDisplay">1</div>
-          <button type="button" id="discoMas">+</button>
-        </div>
-        <p class="hint" id="discoPrecioHint" style="margin-top:8px;">1 disco/llavero — $130 MXN</p>
-
-        <button type="button" class="catalog-toggle" id="toggleImgLlavero">Ver fotos de referencia / ejemplos</button>
-        <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia1.png" alt="Ejemplo 1 de llaveros de disco">
-        <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia2.png" alt="Ejemplo 2 de llaveros de disco">
-        <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia3.png" alt="Ejemplo 3 de llaveros de disco">
-
-        <label class="field-label" style="margin-top:12px;" for="tipoLlavero">Tipo de diseño</label>
-        <select id="tipoLlavero" onchange="toggleDetalleLlavero()">
-          <option value="Álbum Musical">Álbum de un artista / canción</option>
-          <option value="Personalizado con Fotos">Personalizado con mis propias fotos</option>
-        </select>
-
-        <div id="campoDetalleAlbum" style="margin-top:10px;">
-          <label class="field-label" for="detalleAlbumInput">¿De qué artista y álbum/canción te gustaría? (uno por cada disco, sepáralos con coma)</label>
-          <input type="text" id="detalleAlbumInput" placeholder="Ej: Bad Bunny - Un Verano Sin Ti">
-        </div>
-
-        <div id="campoDetalleFotos" style="display:none; margin-top:10px;">
-          <p class="hint" style="margin:0;">📸 Recuerda mandar las fotos para tu(s) llavero(s) por WhatsApp junto con las de tu pedido.</p>
-        </div>
-      </div>
     </div>
 
     <!-- POLAROIDS -->
@@ -700,12 +706,13 @@ const OPCION3_IMG = "./Paquete 3.png";
 const OPCION4_IMG = "./Paquete 4.png";
 
 // URL de tu Google Apps Script (el conector que registra las ventas)
-const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwydfbNEIxLMufCfJ71daq_lQ4bW_0l5p3PCufxlFFL74z6p-T6lgl9vs3Josh1XIIbwA/exec";
+const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyEloKDQFPWiLUQGkUFTfpkOAgusY1ATYvFZWAZ9WxnvVPRejtmmcm59PJlfptg51F_/exec";
 
 let count = 1;
 const MAX_PIEZAS = 10;
 let discoCount = 1;
 const MAX_DISCOS = 10;
+let pedidoYaEnviado = false;
 
 const PACKAGE_OPTIONS = [
   {
@@ -747,6 +754,7 @@ const PACKAGE_OPTIONS = [
   }
 ];
 let selectedOpcion = null;
+let inventarioStock = {}; // se llena al cargar la página, ej: {"Dorado #1": 3, "Plateado #2": 0}
 
 const countDisplay = document.getElementById('countDisplay');
 const piezasContainer = document.getElementById('piezasContainer');
@@ -761,10 +769,34 @@ function escapeHtml(text) {
     .replace(/'/g, "&#039;");
 }
 
+// Trae el inventario actual desde tu Google Sheet. Si falla (sin internet, etc.),
+// simplemente no se marca nada como agotado, para no bloquear el formulario.
+function cargarInventario(){
+  fetch(SHEET_WEBHOOK_URL)
+    .then(r => r.json())
+    .then(data => {
+      inventarioStock = data || {};
+      // vuelve a dibujar los selects de modelo ya cargados con la info fresca
+      document.querySelectorAll('.pieza-card').forEach(card => {
+        const acabadoBtn = card.querySelector('.acabado-row .toggle-btn.active');
+        if(acabadoBtn){
+          const select = card.querySelector('.modeloSelect');
+          const valorActual = select.value;
+          select.innerHTML = acabadoBtn.dataset.val === 'Oro' ? modeloOptions(9, 'Dorado') : modeloOptions(7, 'Plateado');
+          select.value = valorActual;
+        }
+      });
+    })
+    .catch(()=>{});
+}
+
 function modeloOptions(n, prefix){
   let opts = '<option value="">Selecciona…</option>';
   for(let i=1;i<=n;i++){
-    opts += `<option value="${prefix} #${i}">${prefix} #${i}</option>`;
+    const nombreModelo = `${prefix} #${i}`;
+    const stock = inventarioStock.hasOwnProperty(nombreModelo) ? inventarioStock[nombreModelo] : null;
+    const agotado = stock !== null && stock <= 0;
+    opts += `<option value="${nombreModelo}" ${agotado ? 'disabled' : ''}>${nombreModelo}${agotado ? ' — Agotado' : ''}</option>`;
   }
   return opts;
 }
@@ -789,12 +821,9 @@ function renderPiezas(){
       <select class="modeloSelect" data-idx="${i}" disabled>
         <option value="">Elige primero oro o plata</option>
       </select>
-      <div class="catalog-toggle-row">
-        <button type="button" class="catalog-toggle" data-idx="${i}" data-cat="plata">Ver catálogo plateados</button>
-        <button type="button" class="catalog-toggle" data-idx="${i}" data-cat="oro">Ver catálogo dorados</button>
-      </div>
-      <img class="catalog-img" data-idx="${i}" data-cat="plata" src="${PLATA_IMG}" alt="Catálogo plateados">
-      <img class="catalog-img" data-idx="${i}" data-cat="oro" src="${ORO_IMG}" alt="Catálogo dorados">
+      <div class="catalog-toggle-row" style="margin-top:8px; font-weight:700; font-size:12.5px; color:var(--magenta);">Catálogo — elige tu modelo:</div>
+      <img class="catalog-img show" data-idx="${i}" data-cat="plata" src="${PLATA_IMG}" alt="Catálogo plateados">
+      <img class="catalog-img show" data-idx="${i}" data-cat="oro" src="${ORO_IMG}" alt="Catálogo dorados">
 
       <label class="field-label">Encapsulado <span class="required">*</span></label>
       <div class="toggle-row encap-row" data-idx="${i}">
@@ -844,23 +873,6 @@ function attachSinglePiezaListeners(card, i) {
     });
   });
 
-  card.querySelectorAll('.catalog-toggle').forEach(btn => {
-    const cat = btn.dataset.cat;
-    const label = cat === 'plata' ? 'plateados' : 'dorados';
-    btn.addEventListener('click', () => {
-      const img = card.querySelector(`.catalog-img[data-cat="${cat}"]`);
-      const otherCat = cat === 'plata' ? 'oro' : 'plata';
-      const otherImg = card.querySelector(`.catalog-img[data-cat="${otherCat}"]`);
-      const otherBtn = card.querySelector(`.catalog-toggle[data-cat="${otherCat}"]`);
-
-      otherImg.classList.remove('show');
-      otherBtn.textContent = `Ver catálogo ${otherCat === 'plata' ? 'plateados' : 'dorados'}`;
-
-      img.classList.toggle('show');
-      btn.textContent = img.classList.contains('show') ? `Ocultar catálogo ${label}` : `Ver catálogo ${label}`;
-    });
-  });
-
   card.querySelectorAll('.foto-opt').forEach(opt => {
     opt.addEventListener('click', () => {
       card.querySelectorAll('.foto-opt').forEach(o => o.classList.remove('active'));
@@ -895,11 +907,9 @@ function renderOpciones(){
       </div>
       <div class="opcion-incluye">${op.incluye.map(t=>'· '+t).join('<br>')}</div>
       ${op.nota ? `<div class="opcion-nota">${op.nota}</div>` : ''}
-      <button type="button" class="catalog-toggle opcion-foto-toggle" data-id="${op.id}">Ver foto de esta opción</button>
-      <img class="catalog-img opcion-foto" data-id="${op.id}" src="${op.img}" alt="Foto ${op.nombre}">
+      <img class="catalog-img opcion-foto show" data-id="${op.id}" src="${op.img}" alt="Foto ${op.nombre}">
     `;
     div.addEventListener('click', (e) => {
-      if(e.target.closest('.opcion-foto-toggle')) return;
       selectedOpcion = op.id;
       document.querySelectorAll('.opcion-card').forEach(c=>c.classList.remove('active'));
       div.classList.add('active');
@@ -907,16 +917,6 @@ function renderOpciones(){
       renderPolaroids();
     });
     cont.appendChild(div);
-  });
-
-  document.querySelectorAll('.opcion-foto-toggle').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const id = btn.dataset.id;
-      const img = document.querySelector(`.opcion-foto[data-id="${id}"]`);
-      img.classList.toggle('show');
-      btn.textContent = img.classList.contains('show') ? 'Ocultar foto' : 'Ver foto de esta opción';
-    });
   });
 }
 
@@ -998,21 +998,15 @@ function toggleDetalleLlavero() {
   }
 }
 
-document.getElementById('toggleImgLlavero').addEventListener('click', function() {
-  const imgs = document.querySelectorAll('.imgLlaveroRef');
-  let showing = false;
-  imgs.forEach(img => {
-    img.classList.toggle('show');
-    if (img.classList.contains('show')) showing = true;
-  });
-  this.textContent = showing ? 'Ocultar fotos de referencia' : 'Ver fotos de referencia / ejemplos';
-});
-
 renderPiezas();
 renderOpciones();
+cargarInventario();
 
 // Manda una venta a tu Google Sheet (hoja "Ventas"). No detiene el formulario si falla.
-function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entregaTexto){
+// Costo aproximado del material del encapsulado (resina). Ajusta este número si cambia el costo en tu Excel.
+const COSTO_MATERIAL_ENCAPSULADO = 2.26;
+
+function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entregaTexto, formaPagoVal, costoExtraVal){
   fetch(SHEET_WEBHOOK_URL, {
     method: "POST",
     mode: "no-cors",
@@ -1022,6 +1016,9 @@ function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entre
       cliente: nombreCliente,
       entrega: entregaTexto.replace(/\n/g, " / "),
       total: totalVenta,
+      totalCobrado: totalVenta,
+      formaPago: formaPagoVal || "Por definir",
+      costoExtraEncap: costoExtraVal || 0,
       notas: notaExtra || ""
     })
   }).catch(()=>{});
@@ -1029,6 +1026,11 @@ function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entre
 
 document.getElementById('pedidoForm').addEventListener('submit', function(e){
   e.preventDefault();
+
+  if(pedidoYaEnviado){
+    alert('Este pedido ya se envió. Si necesitas hacer otro, recarga la página. 💗');
+    return;
+  }
 
   let valid = true;
   const nombre = document.getElementById('nombre').value.trim();
@@ -1065,6 +1067,7 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
 
   let piezasTxt = [];
   let piezasTicket = [];
+  let modelosElegidos = [];
   let encapsuladoCount = 0;
 
   document.querySelectorAll('.pieza-card').forEach(card => {
@@ -1082,6 +1085,7 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
     }
 
     if(encapBtn && encapBtn.dataset.val === 'Sí') encapsuladoCount++;
+    if(modelo) modelosElegidos.push(modelo);
 
     const fotoVal = radioFoto ? radioFoto.value : null;
     const fotoTxt = fotoVal === 'dos' ? 'Dos fotos (izquierda y derecha distintas)' : (fotoVal === 'una' ? 'Una sola foto' : '—');
@@ -1168,13 +1172,16 @@ Entrega: ${entregaTxt}`;
   });
 
   // === Registro automático en Google Sheets ===
+  const formaPagoVal = document.getElementById('formaPago').value;
   const piezasTexto = count === 1 ? "1 pieza" : count + " piezas";
   registrarVenta(
     `${opcionElegida.nombre} - ${piezasTexto}`,
     opcionPrecio + encapsuladoCosto,
     encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : "",
     nombre,
-    entregaTxt
+    entregaTxt,
+    formaPagoVal,
+    encapsuladoCount * COSTO_MATERIAL_ENCAPSULADO
   );
 
   if(tieneLlavero){
@@ -1183,10 +1190,19 @@ Entrega: ${entregaTxt}`;
       costoLlavero,
       llaveroTxt.replace(/\n/g, " / "),
       nombre,
-      entregaTxt
+      entregaTxt,
+      formaPagoVal,
+      0
     );
   }
   // === Fin registro automático ===
+
+  pedidoYaEnviado = true;
+  const submitBtn = document.querySelector('.submit-btn');
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = '0.6';
+  submitBtn.style.cursor = 'not-allowed';
+  submitBtn.textContent = 'Pedido enviado ✓';
 
   box.scrollIntoView({behavior:'smooth', block:'center'});
 });
