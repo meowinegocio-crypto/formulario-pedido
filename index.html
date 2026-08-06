@@ -1014,8 +1014,6 @@ function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal) 
     items: itemsVenta
   };
 
-  // Enviar usando URLSearchParams evita bloqueos de CORS 
-  // y permite a Google Apps Script leer e.parameter o e.postData sin problemas.
   fetch(SHEET_WEBHOOK_URL, {
     method: "POST",
     headers: {
