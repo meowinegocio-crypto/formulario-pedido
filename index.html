@@ -1124,16 +1124,16 @@ $${totalFinal} MXN`;
   });
 
   // Fila 2: Kit Disco/Llavero mini CD (Coincide exacto con la fila 13 de la pestaña "Paquetes")
-  if (tieneLlavero) {
-envios.push({
-      opcion: "Kit Disco/Llavero mini CD",
-      cliente: nombreVal,
-      entrega: "Mismo pedido de " + nombreVal,
-      totalCobrado: 130,
-      costoExtraEncap: 0,
-      notas: `Llavero Disco x${cantLlaveros} | Tipo: ${tipoLlavero} | Detalle: ${detalleLlavero}`
-    });
-  }
+if (tieneLlavero) {
+      envios.push({
+        opcion: "Kit Disco/Llavero mini CD",
+        cliente: nombreVal,
+        entrega: "Mismo pedido de " + nombreVal,
+        totalCobrado: 130,
+        costoExtraEncap: 0,
+        notas: "Llavero Disco mini CD"
+      });
+    }
 
 // Envío completo de los registros en una sola petición
   fetch(SHEET_WEBHOOK_URL, {
