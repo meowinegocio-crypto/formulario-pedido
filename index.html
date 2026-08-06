@@ -1174,7 +1174,7 @@ Entrega: ${entregaTxt}`;
   const itemsVenta = [
     {
       opcion: `${opcionElegida.nombre} - ${piezasTexto}`,
-      total: opcionPrecio + encapsuladoCosto,
+      precioLista: opcionPrecio,
       totalCobrado: opcionPrecio + encapsuladoCosto,
       costoExtraEncap: encapsuladoCount * COSTO_MATERIAL_ENCAPSULADO,
       notas: encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : ""
@@ -1184,7 +1184,7 @@ Entrega: ${entregaTxt}`;
   if(tieneLlavero){
     itemsVenta.push({
       opcion: `Kit Disco/Llavero mini CD - ${discoPiezasTxt}`,
-      total: costoLlavero,
+      precioLista: costoLlavero,
       totalCobrado: costoLlavero,
       costoExtraEncap: 0,
       notas: llaveroTxt.replace(/\n/g, " / ")
