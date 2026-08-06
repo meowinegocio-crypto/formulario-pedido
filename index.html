@@ -556,18 +556,26 @@
 
     <!-- SECCIÓN LLAVERO DE DISCO -->
     <div class="card">
-      <h2>Llavero de disco ($130 MXN)</h2>
-      <p class="hint">Agrega un llavero inspirado en el álbum de tu artista favorito o personalizado con tus fotos.</p>
+      <h2>Llavero de disco (desde $130 MXN)</h2>
+      <p class="hint">Agrega uno o varios llaveros inspirados en el álbum de tu artista favorito o personalizados con tus fotos.</p>
       
       <label class="radio-opt" style="cursor:pointer;" id="llaveroLabel">
         <input type="checkbox" id="checkLlavero" onchange="toggleLlaveroOptions()">
         <div>
-          <div class="opt-title">¡Sí! Quiero agregar un llavero de disco (+$130 MXN)</div>
-          <div class="opt-desc">Álbum a elegir o fotos personalizadas.</div>
+          <div class="opt-title">¡Sí! Quiero agregar llavero(s) de disco</div>
+          <div class="opt-desc">$130 MXN cada uno — álbum a elegir o fotos personalizadas.</div>
         </div>
       </label>
 
       <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
+        <label class="field-label" style="margin-top:0;">¿Cuántos discos/llaveros quieres?</label>
+        <div class="stepper">
+          <button type="button" id="discoMenos">−</button>
+          <div class="count" id="discoCountDisplay">1</div>
+          <button type="button" id="discoMas">+</button>
+        </div>
+        <p class="hint" id="discoPrecioHint" style="margin-top:8px;">1 disco/llavero — $130 MXN</p>
+
         <button type="button" class="catalog-toggle" id="toggleImgLlavero">Ver fotos de referencia / ejemplos</button>
         <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia1.png" alt="Ejemplo 1 de llaveros de disco">
         <img class="catalog-img imgLlaveroRef" src="./DiscosReferencia2.png" alt="Ejemplo 2 de llaveros de disco">
@@ -580,12 +588,12 @@
         </select>
 
         <div id="campoDetalleAlbum" style="margin-top:10px;">
-          <label class="field-label" for="detalleAlbumInput">¿De qué artista y álbum/canción te gustaría?</label>
+          <label class="field-label" for="detalleAlbumInput">¿De qué artista y álbum/canción te gustaría? (uno por cada disco, sepáralos con coma)</label>
           <input type="text" id="detalleAlbumInput" placeholder="Ej: Bad Bunny - Un Verano Sin Ti">
         </div>
 
         <div id="campoDetalleFotos" style="display:none; margin-top:10px;">
-          <p class="hint" style="margin:0;">📸 Recuerda mandar las fotos para tu llavero por WhatsApp junto con las de tu pedido.</p>
+          <p class="hint" style="margin:0;">📸 Recuerda mandar las fotos para tu(s) llavero(s) por WhatsApp junto con las de tu pedido.</p>
         </div>
       </div>
     </div>
@@ -691,10 +699,13 @@ const OPCION2_IMG = "./Paquete 2.png";
 const OPCION3_IMG = "./Paquete 3.png";
 const OPCION4_IMG = "./Paquete 4.png";
 
+// URL de tu Google Apps Script (el conector que registra las ventas)
 const SHEET_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyEloKDQFPWiLUQGkUFTfpkOAgusY1ATYvFZWAZ9WxnvVPRejtmmcm59PJlfptg51F_/exec";
 
 let count = 1;
 const MAX_PIEZAS = 10;
+let discoCount = 1;
+const MAX_DISCOS = 10;
 
 const PACKAGE_OPTIONS = [
   {
@@ -739,6 +750,16 @@ let selectedOpcion = null;
 
 const countDisplay = document.getElementById('countDisplay');
 const piezasContainer = document.getElementById('piezasContainer');
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 function modeloOptions(n, prefix){
   let opts = '<option value="">Selecciona…</option>';
@@ -950,6 +971,19 @@ function toggleLlaveroOptions() {
   }
 }
 
+function updateDiscoPrecioHint(){
+  const total = discoCount * 130;
+  const etiqueta = discoCount === 1 ? '1 disco/llavero' : `${discoCount} discos/llaveros`;
+  document.getElementById('discoPrecioHint').textContent = `${etiqueta} — $${total} MXN`;
+}
+
+document.getElementById('discoMenos').addEventListener('click', () => {
+  if(discoCount > 1){ discoCount--; document.getElementById('discoCountDisplay').textContent = discoCount; updateDiscoPrecioHint(); }
+});
+document.getElementById('discoMas').addEventListener('click', () => {
+  if(discoCount < MAX_DISCOS){ discoCount++; document.getElementById('discoCountDisplay').textContent = discoCount; updateDiscoPrecioHint(); }
+});
+
 function toggleDetalleLlavero() {
   const select = document.getElementById('tipoLlavero');
   const campoAlbum = document.getElementById('campoDetalleAlbum');
@@ -969,7 +1003,7 @@ document.getElementById('toggleImgLlavero').addEventListener('click', function()
   let showing = false;
   imgs.forEach(img => {
     img.classList.toggle('show');
-    if(img.classList.contains('show')) showing = true;
+    if (img.classList.contains('show')) showing = true;
   });
   this.textContent = showing ? 'Ocultar fotos de referencia' : 'Ver fotos de referencia / ejemplos';
 });
@@ -977,177 +1011,262 @@ document.getElementById('toggleImgLlavero').addEventListener('click', function()
 renderPiezas();
 renderOpciones();
 
-// SUBMIT Y ENVÍO A GOOGLE SHEETS
-document.getElementById('pedidoForm').addEventListener('submit', function(e) {
+// Manda una venta a tu Google Sheet (hoja "Ventas"). No detiene el formulario si falla.
+function registrarVenta(opcionTexto, totalVenta, notaExtra, nombreCliente, entregaTexto){
+  fetch(SHEET_WEBHOOK_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {"Content-Type": "text/plain"},
+    body: JSON.stringify({
+      opcion: opcionTexto,
+      cliente: nombreCliente,
+      entrega: entregaTexto.replace(/\n/g, " / "),
+      total: totalVenta,
+      notas: notaExtra || ""
+    })
+  }).catch(()=>{});
+}
+
+document.getElementById('pedidoForm').addEventListener('submit', function(e){
   e.preventDefault();
 
-  const nombreInput = document.getElementById('nombre');
-  const nombreVal = nombreInput.value.trim();
-  let isValid = true;
+  let valid = true;
+  const nombre = document.getElementById('nombre').value.trim();
+  document.getElementById('err-nombre').style.display = nombre ? 'none' : 'block';
+  document.getElementById('nombre').classList.toggle('error', !nombre);
+  if(!nombre) valid = false;
 
-  if (!nombreVal) {
-    document.getElementById('err-nombre').style.display = 'block';
-    isValid = false;
-  } else {
-    document.getElementById('err-nombre').style.display = 'none';
+  document.getElementById('err-opcion').style.display = selectedOpcion ? 'none' : 'block';
+  if(!selectedOpcion) valid = false;
+
+  const entregaInput = document.querySelector('input[name="entrega"]:checked');
+  document.getElementById('err-entrega').style.display = entregaInput ? 'none' : 'block';
+  if(!entregaInput) valid = false;
+
+  let direccion = '';
+  let punto = '';
+  if(entregaInput && entregaInput.value === 'Entrega con Didi'){
+    direccion = document.getElementById('direccion').value.trim();
+    document.getElementById('direccion').classList.toggle('error', !direccion);
+    if(!direccion) valid = false;
   }
-
-  if (!selectedOpcion) {
-    document.getElementById('err-opcion').style.display = 'block';
-    isValid = false;
-  } else {
-    document.getElementById('err-opcion').style.display = 'none';
-  }
-
-  const entregaOpt = document.querySelector('input[name="entrega"]:checked');
-  if (!entregaOpt) {
-    document.getElementById('err-entrega').style.display = 'block';
-    isValid = false;
-  } else {
-    document.getElementById('err-entrega').style.display = 'none';
-  }
-
-  let entregaTexto = "";
-  if (entregaOpt) {
-    if (entregaOpt.value === "Recoger en punto de entrega") {
-      const pSel = document.getElementById('puntoEntrega').value;
-      if (!pSel) {
-        document.getElementById('err-punto').style.display = 'block';
-        isValid = false;
-      } else if (pSel === "Otro lugar") {
-        const otroTxt = document.getElementById('otroLugar').value.trim();
-        if (!otroTxt) {
-          document.getElementById('err-otroLugar').style.display = 'block';
-          isValid = false;
-        } else {
-          entregaTexto = `Punto de entrega: ${otroTxt} (Otro lugar)`;
-        }
-      } else {
-        entregaTexto = `Punto de entrega: ${pSel}`;
-      }
-    } else {
-      const dirTxt = document.getElementById('direccion').value.trim();
-      entregaTexto = `Didi a domicilio: ${dirTxt}`;
+  if(entregaInput && entregaInput.value === 'Recoger en punto de entrega'){
+    punto = document.getElementById('puntoEntrega').value;
+    document.getElementById('err-punto').style.display = punto ? 'none' : 'block';
+    if(!punto) valid = false;
+    if(punto === 'Otro lugar'){
+      const otroLugar = document.getElementById('otroLugar').value.trim();
+      document.getElementById('otroLugar').classList.toggle('error', !otroLugar);
+      document.getElementById('err-otroLugar').style.display = otroLugar ? 'none' : 'block';
+      if(!otroLugar) valid = false;
+      if(otroLugar) punto = `Otro lugar: ${otroLugar}`;
     }
   }
 
-  if (!isValid) return;
+  let piezasTxt = [];
+  let piezasTicket = [];
+  let encapsuladoCount = 0;
 
-  const opcionObj = PACKAGE_OPTIONS.find(o => o.id === selectedOpcion);
-  let totalBase = priceForCount(opcionObj, count);
-  let piezasConEncap = 0;
-  let resumenPiezasTxt = "";
-
-  for (let i = 1; i <= count; i++) {
-    const card = document.querySelector(`.pieza-card[data-idx="${i}"]`);
+  document.querySelectorAll('.pieza-card').forEach(card => {
+    const idx = card.dataset.idx;
     const acabadoBtn = card.querySelector('.acabado-row .toggle-btn.active');
-    const modeloSel = card.querySelector('.modeloSelect').value;
     const encapBtn = card.querySelector('.encap-row .toggle-btn.active');
-    const fotoOpt = card.querySelector(`input[name="fotoOpcion${i}"]:checked`);
+    const modelo = card.querySelector('.modeloSelect').value;
+    const radioFoto = card.querySelector(`input[name="fotoOpcion${idx}"]:checked`);
 
-    const encapVal = encapBtn ? encapBtn.dataset.val : 'No';
-    if (encapVal === 'Sí') piezasConEncap++;
+    if(!acabadoBtn || !encapBtn || !modelo || !radioFoto){
+      valid = false;
+      card.style.borderColor = '#e63946';
+    } else {
+      card.style.borderColor = '';
+    }
 
-    resumenPiezasTxt += `\nRelicario ${i}:
-  · Acabado: ${acabadoBtn ? acabadoBtn.dataset.val : 'Sin especificar'}
-  · Modelo: ${modeloSel || 'Sin especificar'}
-  · Encapsulado: ${encapVal}
-  · Fotos: ${fotoOpt ? (fotoOpt.value === 'dos' ? 'Dos fotos (izquierda y derecha distintas)' : 'Una sola foto') : 'Sin especificar'}\n`;
+    if(encapBtn && encapBtn.dataset.val === 'Sí') encapsuladoCount++;
+
+    const fotoVal = radioFoto ? radioFoto.value : null;
+    const fotoTxt = fotoVal === 'dos' ? 'Dos fotos (izquierda y derecha distintas)' : (fotoVal === 'una' ? 'Una sola foto' : '—');
+
+    piezasTxt.push(
+`Relicario ${idx}:
+  · Acabado: ${acabadoBtn ? acabadoBtn.dataset.val : '—'}
+  · Modelo: ${modelo || '—'}
+  · Encapsulado: ${encapBtn ? encapBtn.dataset.val : '—'}
+  · Fotos: ${fotoTxt}`);
+
+    piezasTicket.push({
+      idx,
+      acabado: acabadoBtn ? acabadoBtn.dataset.val : '—',
+      modelo: modelo || '—',
+      encap: encapBtn ? encapBtn.dataset.val : '—',
+      fotos: fotoTxt
+    });
+  });
+
+  if(!valid){
+    alert('Falta llenar algunos campos, revisa lo marcado en rojo 💗');
+    return;
   }
 
-  let costoEncapTotal = piezasConEncap * 20;
-  let costoLlavero = 0;
-  let resumenLlaveroTxt = "";
+  const opcionElegida = PACKAGE_OPTIONS.find(o=>o.id === selectedOpcion);
+  const opcionPrecio = priceForCount(opcionElegida, count);
+  const ENCAPSULADO_PRICE = 20;
+  const encapsuladoCosto = encapsuladoCount * ENCAPSULADO_PRICE;
 
   const checkLlavero = document.getElementById('checkLlavero');
   const tieneLlavero = checkLlavero && checkLlavero.checked;
-  let tipoLlavero = "";
-  let detalleLlavero = "";
+  const costoLlavero = tieneLlavero ? discoCount * 130 : 0;
+  const discoPiezasTxt = discoCount === 1 ? "1 pieza" : discoCount + " piezas";
 
+  let llaveroTxt = 'No incluido';
   if (tieneLlavero) {
-    costoLlavero = 130;
-    tipoLlavero = document.getElementById('tipoLlavero').value;
-    detalleLlavero = (tipoLlavero === 'Álbum Musical') 
-      ? (document.getElementById('detalleAlbumInput').value.trim() || 'Sin especificar')
-      : 'Fotos personalizadas mandadas por WhatsApp';
-
-    resumenLlaveroTxt = `\nLlavero: Llavero de disco ($130 MXN)\n  · Tipo: ${tipoLlavero}\n  · Detalle: ${detalleLlavero}`;
+    const tipo = document.getElementById('tipoLlavero').value;
+    if (tipo === 'Álbum Musical') {
+      const albumInput = document.getElementById('detalleAlbumInput').value.trim();
+      llaveroTxt = `Llavero de disco (${discoPiezasTxt} — $${costoLlavero} MXN)\n  · Tipo: ${tipo}\n  · Detalle: ${albumInput || 'Sin especificar'}`;
+    } else {
+      llaveroTxt = `Llavero de disco (${discoPiezasTxt} — $${costoLlavero} MXN)\n  · Tipo: ${tipo}`;
+    }
   }
 
-  let totalFinal = totalBase + costoEncapTotal + costoLlavero;
+  const total = opcionPrecio + encapsuladoCosto + costoLlavero;
 
-  // RESUMEN TEXTO WHATSAPP
-  let resumenTexto = `✨ PEDIDO LAVIBEE.MX ✨
-Nombre: ${nombreVal}
+  const opcionTxt = `${opcionElegida.nombre} — $${opcionPrecio} MXN\n  · ${opcionElegida.incluye.join('\n  · ')}`;
+  const encapsuladoTxt = encapsuladoCount > 0
+    ? `Encapsulado (${encapsuladoCount} pieza${encapsuladoCount>1?'s':''}): $${ENCAPSULADO_PRICE} c/u = $${encapsuladoCosto} MXN`
+    : 'Sin encapsulado';
+
+  const entregaTxt = entregaInput.value
+    + (punto ? `\n  Punto: ${punto}` : '')
+    + (direccion ? `\n  Dirección: ${direccion}` : '');
+
+  const resumenRaw =
+`✨ PEDIDO LAVIBEE.MX ✨
+Nombre: ${nombre}
 Número de piezas: ${count}
-${resumenPiezasTxt}
-Empaque: ${opcionObj.nombre} — $${totalBase} MXN
-  ${opcionObj.incluye.map(t => '· ' + t).join('\n  ')}`;
 
-  if (piezasConEncap > 0) {
-    resumenTexto += `\nEncapsulado (${piezasConEncap} pieza${piezasConEncap > 1 ? 's' : ''}): $20 c/u = $${costoEncapTotal} MXN`;
-  }
-  if (resumenLlaveroTxt) {
-    resumenTexto += resumenLlaveroTxt;
-  }
+${piezasTxt.join('\n\n')}
 
-  resumenTexto += `\nPolaroids incluidas: ${opcionObj.polaroidCount * count}
+Empaque: ${opcionTxt}
+${encapsuladoTxt}
+Llavero: ${llaveroTxt}
+Polaroids incluidas: ${opcionElegida.polaroidCount}
 
-Entrega: ${entregaOpt ? entregaOpt.value : ''}
-${entregaTexto}
+Entrega: ${entregaTxt}`;
 
-TOTAL FINAL:
-$${totalFinal} MXN`;
-
-  const resumenBox = document.getElementById('resumenBox');
-  resumenBox.innerText = resumenTexto;
-  resumenBox.classList.add('show');
+  const box = document.getElementById('resumenBox');
+  box.innerHTML = `${escapeHtml(resumenRaw)}\n\nTOTAL FINAL:\n<span class="precio-destacado">$${total} MXN</span>`;
+  box.classList.add('show');
   document.getElementById('btnRow').classList.remove('hide');
   document.getElementById('fotoNote').style.display = 'block';
 
-  const waMessage = encodeURIComponent(resumenTexto);
-  document.getElementById('waBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
+  const waResumen = `${resumenRaw}\n\nTOTAL: $${total} MXN`;
+  document.getElementById('waBtn').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waResumen)}`;
 
-  // ENVIAR A GOOGLE SHEETS (Se dividen los datos en filas separadas si se incluyó llavero)
-  const envios = [];
-
-  // Fila 1: Paquete + Encapsulado (Columna H recibe costoEncapTotal)
-  const totalCobradoPaquete = totalBase + costoEncapTotal;
-  const nombreOpcionVentas = `${opcionObj.nombre} - ${count} pieza${count > 1 ? 's' : ''}`;
-
-  envios.push({
-    opcion: nombreOpcionVentas,
-    cliente: nombreVal,
-    entrega: entregaTexto,
-    totalCobrado: totalCobradoPaquete,
-    costoExtraEncap: costoEncapTotal
+  generarTicket({
+    nombre, count, piezasTicket, opcionElegida, opcionPrecio,
+    encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, discoCount, llaveroTxt, entregaTxt, total
   });
 
-  // Fila 2: Kit Disco/Llavero mini CD (Coincide exacto con la fila 13 de la pestaña "Paquetes")
-if (tieneLlavero) {
-      envios.push({
-        opcion: "Kit Disco/Llavero mini CD",
-        cliente: nombreVal,
-        entrega: "Mismo pedido de " + nombreVal,
-        totalCobrado: 130,
-        costoExtraEncap: 0,
-        notas: "Llavero Disco mini CD"
-      });
-    }
+  // === Registro automático en Google Sheets ===
+  const piezasTexto = count === 1 ? "1 pieza" : count + " piezas";
+  registrarVenta(
+    `${opcionElegida.nombre} - ${piezasTexto}`,
+    opcionPrecio + encapsuladoCosto,
+    encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : "",
+    nombre,
+    entregaTxt
+  );
 
-// Envío completo de los registros en una sola petición
-  fetch(SHEET_WEBHOOK_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(envios)
-  }).catch(err => console.error("Error al registrar venta:", err));
+  if(tieneLlavero){
+    registrarVenta(
+      `Kit Disco/Llavero mini CD - ${discoPiezasTxt}`,
+      costoLlavero,
+      llaveroTxt.replace(/\n/g, " / "),
+      nombre,
+      entregaTxt
+    );
+  }
+  // === Fin registro automático ===
+
+  box.scrollIntoView({behavior:'smooth', block:'center'});
 });
 
-document.getElementById('copiarBtn').addEventListener('click', function() {
+document.getElementById('copiarBtn').addEventListener('click', () => {
   const text = document.getElementById('resumenBox').innerText;
   navigator.clipboard.writeText(text).then(() => {
-    alert('¡Resumen copiado al portapapeles! 📋');
+    const btn = document.getElementById('copiarBtn');
+    const original = btn.textContent;
+    btn.textContent = '¡Copiado! ✓';
+    setTimeout(() => { btn.textContent = original; }, 1600);
+  });
+});
+
+function ticketLine(label, valor){
+  return `<div class="ticket-line"><span>${label}</span><span class="dots"></span><span>${valor}</span></div>`;
+}
+
+function generarTicket(data){
+  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, discoCount, total} = data;
+
+  let piezasHTML = '';
+  piezasTicket.forEach(p => {
+    piezasHTML += `
+      <div class="ticket-block">
+        RELICARIO ${p.idx}:<br>
+        &nbsp;· ACABADO: ${escapeHtml(p.acabado.toUpperCase())}<br>
+        &nbsp;· MODELO: ${escapeHtml(p.modelo.toUpperCase())}<br>
+        ${ticketLine('&nbsp;· ENCAPSULADO: ' + escapeHtml(p.encap.toUpperCase()), p.encap === 'Sí' ? '$20 MXN' : '')}
+        &nbsp;· FOTOS: ${escapeHtml(p.fotos.toUpperCase())}
+      </div>`;
+  });
+
+  const incluyeHTML = opcionElegida.incluye.map(t => `&nbsp;· ${escapeHtml(t.toUpperCase())}`).join('<br>');
+
+  document.getElementById('ticketBox').innerHTML = `
+    <div class="ticket-logo">
+      <div class="lv">La Vibe</div>
+      <div class="tag">COSITAS LINDAS</div>
+    </div>
+    <div class="ticket-title">TICKET DE COMPRA</div>
+    <hr>
+    <div class="ticket-block">
+      ✨ PEDIDO LA VIBE ✨<br>
+      NOMBRE: ${escapeHtml(nombre.toUpperCase())}<br>
+      NÚMERO DE PIEZAS: ${count}
+    </div>
+    <hr>
+    ${piezasHTML}
+    <hr>
+    <div class="ticket-block">
+      ${ticketLine('EMPAQUE: ' + escapeHtml(opcionElegida.nombre.toUpperCase()), '$' + opcionPrecio + ' MXN')}
+      ${incluyeHTML}
+    </div>
+    <div class="ticket-block">
+      ${ticketLine('ENCAPSULADO' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
+    </div>
+    ${tieneLlavero ? `<div class="ticket-block">${ticketLine('LLAVERO DE DISCO x' + discoCount, '$' + costoLlavero + ' MXN')}</div>` : ''}
+    <div class="ticket-stars">********************************</div>
+    <div class="ticket-total">TOTAL&nbsp;&nbsp;&nbsp;&nbsp;$${total}.00 MXN</div>
+    <div class="ticket-stars">********************************</div>
+    <div class="ticket-footer">
+      VISIT US!<br>
+      Facebook @Vibe Sweet<br>
+      Instagram @lavibee.mx
+    </div>
+  `;
+
+  document.getElementById('ticketWrap').style.display = 'block';
+}
+
+document.getElementById('descargarTicketBtn').addEventListener('click', () => {
+  const ticket = document.getElementById('ticketBox');
+  html2canvas(ticket, {backgroundColor:'#fbf6ee', scale:2}).then(canvas => {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'ticket-lavibee.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   });
 });
 </script>
