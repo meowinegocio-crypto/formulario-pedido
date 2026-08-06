@@ -1006,20 +1006,27 @@ cargarInventario();
 // Costo aproximado del material del encapsulado (resina). Ajusta este número si cambia el costo en tu Excel.
 const COSTO_MATERIAL_ENCAPSULADO = 2.26;
 
-function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal){
+function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal) {
+  const payload = {
+    cliente: nombreCliente,
+    entrega: entregaTexto.replace(/\n/g, " / "),
+    formaPago: formaPagoVal || "Por definir",
+    items: itemsVenta
+  };
+
+  // Enviar usando URLSearchParams evita bloqueos de CORS 
+  // y permite a Google Apps Script leer e.parameter o e.postData sin problemas.
   fetch(SHEET_WEBHOOK_URL, {
     method: "POST",
-    mode: "no-cors",
-    headers: {"Content-Type": "text/plain"},
-    body: JSON.stringify({
-      cliente: nombreCliente,
-      entrega: entregaTexto.replace(/\n/g, " / "),
-      formaPago: formaPagoVal || "Por definir",
-      items: itemsVenta
-    })
-  }).catch(()=>{});
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: "data=" + encodeURIComponent(JSON.stringify(payload))
+  })
+  .then(response => response.text())
+  .then(res => console.log("Registro exitoso:", res))
+  .catch(err => console.error("Error al registrar:", err));
 }
-
 document.getElementById('pedidoForm').addEventListener('submit', function(e){
   e.preventDefault();
 
