@@ -526,22 +526,80 @@
 
   <form id="pedidoForm">
 
+    <!-- OPCIONES DE EMPAQUE (se ve primero, con los extras) -->
+    <div class="card">
+      <h2>Opción de empaque</h2>
+      <p class="hint">El precio se ajusta solo según tu número de piezas. Elige tu opción antes de personalizar tu relicario.</p>
+      <div id="opcionesContainer"></div>
+      <div class="error-msg" id="err-opcion">Elige una opción de empaque 🤍</div>
+
+      <div style="margin-top:14px; padding:12px 14px; border-radius:14px; background:#fff0fb; border:1.5px solid #f0cdea;">
+        <div style="font-weight:700; font-size:13px; color:var(--magenta); margin-bottom:6px;">💰 Costos extra a considerar:</div>
+        <div style="font-size:12.5px; color:#7a4a6c; line-height:1.7;">
+          · Encapsulado (foto sellada para siempre): +$20 MXN por pieza<br>
+          · Baño de plata: +$20 MXN por pieza<br>
+          · Entrega fuera de mi zona: +$20–30 MXN, se paga aparte al momento de la entrega
+        </div>
+      </div>
+
+      <div id="cajaOpcion3Wrap" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
+        <label class="field-label" style="margin-top:0;">¿De qué color quieres tu bolsa de regalo?</label>
+        <div class="radio-opt" data-caja="rosa">
+          <input type="radio" name="colorCaja" value="Rosa con moño" id="cajaRosa">
+          <div><div class="opt-title">Rosa con moño</div></div>
+        </div>
+        <div class="radio-opt" data-caja="blanca">
+          <input type="radio" name="colorCaja" value="Blanca con rojo" id="cajaBlanca">
+          <div><div class="opt-title">Blanca con moño rojo</div></div>
+        </div>
+        <div class="error-msg" id="err-caja">Elige el color de tu bolsa de regalo 🤍</div>
+      </div>
+    </div>
+
+    <!-- ELIGE TU RELICARIO -->
+    <div class="card">
+      <h2>Elige tu relicario</h2>
+      <p class="hint">¿Cuántas piezas quieres?</p>
+      <div class="stepper">
+        <button type="button" id="menos">−</button>
+        <div class="count" id="countDisplay">1</div>
+        <button type="button" id="mas">+</button>
+      </div>
+    </div>
+
+    <!-- PIEZAS DINAMICAS -->
+    <div id="piezasContainer"></div>
+
+    <!-- POLAROIDS -->
+    <div class="card" id="polaroidsWrap" style="display:none;">
+      <h2>Polaroids de regalo</h2>
+      <p class="hint" id="polaroidsHint" style="margin-bottom:0;">Sube las fotos que quieres imprimir como polaroids de regalo.</p>
+    </div>
+
     <!-- ANUNCIO DESTACADO: LLAVERO DE DISCO -->
     <div class="card" style="border:2px solid var(--pink-hot); background:linear-gradient(180deg,#fff5fd,#fff);">
       <h2>✨ ¿Quieres un llavero de disco? (desde $130 MXN)</h2>
-      <p class="hint">Antes de armar tu pedido, decide si quieres agregar uno. Inspirado en el álbum de tu artista favorito o personalizado con tus fotos.</p>
+      <p class="hint">Inspirado en el álbum de tu artista favorito o personalizado con tus fotos.</p>
 
       <img class="catalog-img show" src="./DiscosReferencia1.png" alt="Ejemplo 1 de llaveros de disco" style="margin-bottom:8px;">
       <img class="catalog-img show" src="./DiscosReferencia2.png" alt="Ejemplo 2 de llaveros de disco" style="margin-bottom:8px;">
       <img class="catalog-img show" src="./DiscosReferencia3.png" alt="Ejemplo 3 de llaveros de disco">
 
-      <label class="radio-opt" style="cursor:pointer; margin-top:14px;" id="llaveroLabel">
-        <input type="checkbox" id="checkLlavero" onchange="toggleLlaveroOptions()">
+      <div class="radio-opt" data-llavero="si" style="cursor:pointer; margin-top:14px;">
+        <input type="radio" name="quiereLlavero" value="si" id="llaveroSi">
         <div>
           <div class="opt-title">¡Sí! Quiero agregar llavero(s) de disco</div>
           <div class="opt-desc">$130 MXN cada uno — álbum a elegir o fotos personalizadas.</div>
         </div>
-      </label>
+      </div>
+      <div class="radio-opt" data-llavero="no" style="cursor:pointer;">
+        <input type="radio" name="quiereLlavero" value="no" id="llaveroNo">
+        <div>
+          <div class="opt-title">No, gracias</div>
+          <div class="opt-desc">Solo quiero mi(s) relicario(s).</div>
+        </div>
+      </div>
+      <div class="error-msg" id="err-llavero">Elige si quieres o no un llavero de disco 🤍</div>
 
       <div id="opcionesLlavero" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
         <label class="field-label" style="margin-top:0;">¿Cuántos discos/llaveros quieres?</label>
@@ -567,47 +625,6 @@
           <p class="hint" style="margin:0;">📸 Recuerda mandar las fotos para tu(s) llavero(s) por WhatsApp junto con las de tu pedido.</p>
         </div>
       </div>
-    </div>
-
-    <!-- DATOS GENERALES -->
-    <div class="card">
-      <h2>Tus datos</h2>
-      <p class="hint">Para saber a quién le armamos el pedido.</p>
-
-      <label class="field-label" for="nombre">Nombre <span class="required">*</span></label>
-      <input type="text" id="nombre" placeholder="Tu nombre" required>
-      <div class="error-msg" id="err-nombre">Escribe tu nombre porfa 🤍</div>
-
-      <label class="field-label" for="formaPago">Forma de pago <span class="required">*</span></label>
-      <select id="formaPago">
-        <option value="Efectivo">Efectivo</option>
-        <option value="Transferencia">Transferencia / Tarjeta</option>
-        <option value="Por definir">Por definir</option>
-      </select>
-
-      <label class="field-label">Número de piezas <span class="required">*</span></label>
-      <div class="stepper">
-        <button type="button" id="menos">−</button>
-        <div class="count" id="countDisplay">1</div>
-        <button type="button" id="mas">+</button>
-      </div>
-    </div>
-
-    <!-- PIEZAS DINAMICAS -->
-    <div id="piezasContainer"></div>
-
-    <!-- OPCIONES DE EMPAQUE -->
-    <div class="card">
-      <h2>Opción de empaque</h2>
-      <p class="hint">El precio se ajusta solo según tu número de piezas.</p>
-      <div id="opcionesContainer"></div>
-      <div class="error-msg" id="err-opcion">Elige una opción de empaque 🤍</div>
-    </div>
-
-    <!-- POLAROIDS -->
-    <div class="card" id="polaroidsWrap" style="display:none;">
-      <h2>Polaroids de regalo</h2>
-      <p class="hint" id="polaroidsHint" style="margin-bottom:0;">Sube las fotos que quieres imprimir como polaroids de regalo.</p>
     </div>
 
     <!-- ENTREGA -->
@@ -668,6 +685,23 @@
         <textarea id="direccion" placeholder="Calle, número, colonia, referencias..."></textarea>
       </div>
       <div class="error-msg" id="err-entrega">Elige una opción de entrega 🤍</div>
+    </div>
+
+    <!-- DATOS GENERALES (al final) -->
+    <div class="card">
+      <h2>Tus datos</h2>
+      <p class="hint">Para saber a quién le armamos el pedido.</p>
+
+      <label class="field-label" for="nombre">Nombre <span class="required">*</span></label>
+      <input type="text" id="nombre" placeholder="Tu nombre" required>
+      <div class="error-msg" id="err-nombre">Escribe tu nombre porfa 🤍</div>
+
+      <label class="field-label" for="formaPago">Forma de pago <span class="required">*</span></label>
+      <select id="formaPago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="Transferencia">Transferencia / Tarjeta</option>
+        <option value="Por definir">Por definir</option>
+      </select>
     </div>
 
     <button type="submit" class="submit-btn">Generar resumen ✨</button>
@@ -817,13 +851,14 @@ function renderPiezas(){
         <button type="button" class="toggle-btn" data-val="Plata">Plata</button>
       </div>
 
+      <div class="catalog-toggle-row" style="margin-top:8px; font-weight:700; font-size:12.5px; color:var(--magenta);">Catálogo — mira los modelos disponibles:</div>
+      <img class="catalog-img" data-idx="${i}" data-cat="plata" src="${PLATA_IMG}" alt="Catálogo plateados">
+      <img class="catalog-img" data-idx="${i}" data-cat="oro" src="${ORO_IMG}" alt="Catálogo dorados">
+
       <label class="field-label">Número de modelo <span class="required">*</span></label>
       <select class="modeloSelect" data-idx="${i}" disabled>
         <option value="">Elige primero oro o plata</option>
       </select>
-      <div class="catalog-toggle-row" style="margin-top:8px; font-weight:700; font-size:12.5px; color:var(--magenta);">Catálogo — elige tu modelo:</div>
-      <img class="catalog-img show" data-idx="${i}" data-cat="plata" src="${PLATA_IMG}" alt="Catálogo plateados">
-      <img class="catalog-img show" data-idx="${i}" data-cat="oro" src="${ORO_IMG}" alt="Catálogo dorados">
 
       <label class="field-label">Encapsulado <span class="required">*</span></label>
       <div class="toggle-row encap-row" data-idx="${i}">
@@ -862,6 +897,17 @@ function attachSinglePiezaListeners(card, i) {
       const select = card.querySelector('.modeloSelect');
       select.innerHTML = btn.dataset.val === 'Oro' ? modeloOptions(9, 'Dorado') : modeloOptions(7, 'Plateado');
       select.disabled = false;
+
+      // Muestra solo el catálogo del acabado elegido (oro o plata)
+      const imgOro = card.querySelector('.catalog-img[data-cat="oro"]');
+      const imgPlata = card.querySelector('.catalog-img[data-cat="plata"]');
+      if(btn.dataset.val === 'Oro'){
+        imgOro.classList.add('show');
+        imgPlata.classList.remove('show');
+      } else {
+        imgPlata.classList.add('show');
+        imgOro.classList.remove('show');
+      }
     });
   });
 
@@ -915,6 +961,10 @@ function renderOpciones(){
       div.classList.add('active');
       document.getElementById('err-opcion').style.display = 'none';
       renderPolaroids();
+
+      // Opción 3: pedir color de bolsa de regalo
+      const cajaWrap = document.getElementById('cajaOpcion3Wrap');
+      cajaWrap.style.display = (op.id === 'opcion3') ? 'block' : 'none';
     });
     cont.appendChild(div);
   });
@@ -962,14 +1012,19 @@ document.getElementById('puntoEntrega').addEventListener('change', function(){
 });
 
 function toggleLlaveroOptions() {
-  const check = document.getElementById('checkLlavero');
+  const quiere = document.querySelector('input[name="quiereLlavero"]:checked');
   const divOpciones = document.getElementById('opcionesLlavero');
-  const label = document.getElementById('llaveroLabel');
-  if (check && divOpciones) {
-    divOpciones.style.display = check.checked ? 'block' : 'none';
-    label.classList.toggle('active', check.checked);
+  document.querySelectorAll('.radio-opt[data-llavero]').forEach(el => el.classList.remove('active'));
+  if(quiere){
+    document.querySelector(`.radio-opt[data-llavero="${quiere.value}"]`).classList.add('active');
+  }
+  if (divOpciones) {
+    divOpciones.style.display = (quiere && quiere.value === 'si') ? 'block' : 'none';
   }
 }
+document.querySelectorAll('input[name="quiereLlavero"]').forEach(radio => {
+  radio.addEventListener('change', toggleLlaveroOptions);
+});
 
 function updateDiscoPrecioHint(){
   const total = discoCount * 130;
@@ -997,6 +1052,15 @@ function toggleDetalleLlavero() {
     campoFotos.style.display = 'block';
   }
 }
+
+document.querySelectorAll('.radio-opt[data-caja]').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.radio-opt[data-caja]').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    opt.querySelector('input').checked = true;
+    document.getElementById('err-caja').style.display = 'none';
+  });
+});
 
 renderPiezas();
 renderOpciones();
@@ -1029,10 +1093,13 @@ function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal) 
 document.getElementById('pedidoForm').addEventListener('submit', function(e){
   e.preventDefault();
 
-  if(pedidoYaEnviado){
-    alert('Este pedido ya se envió. Si necesitas hacer otro, recarga la página. 💗');
-    return;
-  }
+  if(pedidoYaEnviado) return; // bloqueo inmediato: nada de doble clic ni doble toque
+  pedidoYaEnviado = true;
+
+  const submitBtnEarly = document.querySelector('.submit-btn');
+  submitBtnEarly.disabled = true;
+  submitBtnEarly.style.opacity = '0.6';
+  submitBtnEarly.style.cursor = 'not-allowed';
 
   let valid = true;
   const nombre = document.getElementById('nombre').value.trim();
@@ -1042,6 +1109,16 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
 
   document.getElementById('err-opcion').style.display = selectedOpcion ? 'none' : 'block';
   if(!selectedOpcion) valid = false;
+
+  const quiereLlaveroInput = document.querySelector('input[name="quiereLlavero"]:checked');
+  document.getElementById('err-llavero').style.display = quiereLlaveroInput ? 'none' : 'block';
+  if(!quiereLlaveroInput) valid = false;
+
+  if(selectedOpcion === 'opcion3'){
+    const colorCajaInput = document.querySelector('input[name="colorCaja"]:checked');
+    document.getElementById('err-caja').style.display = colorCajaInput ? 'none' : 'block';
+    if(!colorCajaInput) valid = false;
+  }
 
   const entregaInput = document.querySelector('input[name="entrega"]:checked');
   document.getElementById('err-entrega').style.display = entregaInput ? 'none' : 'block';
@@ -1109,6 +1186,11 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
   });
 
   if(!valid){
+    // Se libera el bloqueo para que pueda corregir y reintentar
+    pedidoYaEnviado = false;
+    submitBtnEarly.disabled = false;
+    submitBtnEarly.style.opacity = '1';
+    submitBtnEarly.style.cursor = 'pointer';
     alert('Falta llenar algunos campos, revisa lo marcado en rojo 💗');
     return;
   }
@@ -1118,10 +1200,12 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
   const ENCAPSULADO_PRICE = 20;
   const encapsuladoCosto = encapsuladoCount * ENCAPSULADO_PRICE;
 
-  const checkLlavero = document.getElementById('checkLlavero');
-  const tieneLlavero = checkLlavero && checkLlavero.checked;
+  const tieneLlavero = quiereLlaveroInput.value === 'si';
   const costoLlavero = tieneLlavero ? discoCount * 130 : 0;
   const discoPiezasTxt = discoCount === 1 ? "1 pieza" : discoCount + " piezas";
+
+  const colorCajaInput = document.querySelector('input[name="colorCaja"]:checked');
+  const colorCajaTxt = (selectedOpcion === 'opcion3' && colorCajaInput) ? colorCajaInput.value : '';
 
   let llaveroTxt = 'No incluido';
   if (tieneLlavero) {
@@ -1136,7 +1220,8 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
 
   const total = opcionPrecio + encapsuladoCosto + costoLlavero;
 
-  const opcionTxt = `${opcionElegida.nombre} — $${opcionPrecio} MXN\n  · ${opcionElegida.incluye.join('\n  · ')}`;
+  const opcionTxt = `${opcionElegida.nombre} — $${opcionPrecio} MXN\n  · ${opcionElegida.incluye.join('\n  · ')}`
+    + (colorCajaTxt ? `\n  · Color de bolsa: ${colorCajaTxt}` : '');
   const encapsuladoTxt = encapsuladoCount > 0
     ? `Encapsulado (${encapsuladoCount} pieza${encapsuladoCount>1?'s':''}): $${ENCAPSULADO_PRICE} c/u = $${encapsuladoCosto} MXN`
     : 'Sin encapsulado';
@@ -1183,7 +1268,11 @@ Entrega: ${entregaTxt}`;
       precioLista: opcionPrecio,
       totalCobrado: opcionPrecio + encapsuladoCosto,
       costoExtraEncap: encapsuladoCount * COSTO_MATERIAL_ENCAPSULADO,
-      notas: encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : ""
+      modelos: modelosElegidos,
+      notas: [
+        encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : "",
+        colorCajaTxt ? `Caja: ${colorCajaTxt}` : ""
+      ].filter(Boolean).join(" / ")
     }
   ];
 
@@ -1200,14 +1289,14 @@ Entrega: ${entregaTxt}`;
   registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal);
   // === Fin registro automático ===
 
-  pedidoYaEnviado = true;
-  const submitBtn = document.querySelector('.submit-btn');
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = '0.6';
-  submitBtn.style.cursor = 'not-allowed';
-  submitBtn.textContent = 'Pedido enviado ✓';
+  submitBtnEarly.textContent = 'Pedido enviado ✓';
 
   box.scrollIntoView({behavior:'smooth', block:'center'});
+
+  // Recordatorio emergente de fotos
+  setTimeout(() => {
+    alert('📸 ¡Pedido enviado! No olvides mandar tus fotos por este mismo chat de WhatsApp — en el orden de tus relicarios (izquierda/derecha o única), y las de tus polaroids o llavero si tu pedido las incluye.');
+  }, 300);
 });
 
 document.getElementById('copiarBtn').addEventListener('click', () => {
