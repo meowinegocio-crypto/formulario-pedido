@@ -541,19 +541,6 @@
           · Entrega fuera de mi zona: +$20–30 MXN, se paga aparte al momento de la entrega
         </div>
       </div>
-
-      <div id="cajaOpcion3Wrap" style="display:none; margin-top:14px; padding-top:10px; border-top:1.5px dashed #f0cdea;">
-        <label class="field-label" style="margin-top:0;">¿De qué color quieres tu bolsa de regalo?</label>
-        <div class="radio-opt" data-caja="rosa">
-          <input type="radio" name="colorCaja" value="Rosa con moño" id="cajaRosa">
-          <div><div class="opt-title">Rosa con moño</div></div>
-        </div>
-        <div class="radio-opt" data-caja="blanca">
-          <input type="radio" name="colorCaja" value="Blanca con rojo" id="cajaBlanca">
-          <div><div class="opt-title">Blanca con moño rojo</div></div>
-        </div>
-        <div class="error-msg" id="err-caja">Elige el color de tu bolsa de regalo 🤍</div>
-      </div>
     </div>
 
     <!-- ELIGE TU RELICARIO -->
@@ -954,6 +941,7 @@ function renderOpciones(){
       <div class="opcion-incluye">${op.incluye.map(t=>'· '+t).join('<br>')}</div>
       ${op.nota ? `<div class="opcion-nota">${op.nota}</div>` : ''}
       <img class="catalog-img opcion-foto show" data-id="${op.id}" src="${op.img}" alt="Foto ${op.nombre}">
+      <button type="button" class="submit-btn" style="margin-top:12px; padding:10px; font-size:15px;">Elegir esta opción</button>
     `;
     div.addEventListener('click', (e) => {
       selectedOpcion = op.id;
@@ -962,11 +950,46 @@ function renderOpciones(){
       document.getElementById('err-opcion').style.display = 'none';
       renderPolaroids();
 
-      // Opción 3: pedir color de bolsa de regalo
+      // Opción 3: pedir color de bolsa de regalo, justo debajo de esta opción
       const cajaWrap = document.getElementById('cajaOpcion3Wrap');
-      cajaWrap.style.display = (op.id === 'opcion3') ? 'block' : 'none';
+      if(cajaWrap) cajaWrap.style.display = (op.id === 'opcion3') ? 'block' : 'none';
     });
     cont.appendChild(div);
+
+    // La elección de color de bolsa aparece justo debajo de la tarjeta de Opción 3
+    if(op.id === 'opcion3'){
+      const cajaWrap = document.createElement('div');
+      cajaWrap.id = 'cajaOpcion3Wrap';
+      cajaWrap.style.display = (selectedOpcion === 'opcion3') ? 'block' : 'none';
+      cajaWrap.style.margin = '-6px 0 14px';
+      cajaWrap.style.padding = '14px';
+      cajaWrap.style.borderRadius = '16px';
+      cajaWrap.style.background = '#fff0fb';
+      cajaWrap.style.border = '1.5px solid var(--pink-hot)';
+      cajaWrap.innerHTML = `
+        <label class="field-label" style="margin-top:0;">¿De qué color quieres tu bolsa de regalo?</label>
+        <div class="radio-opt" data-caja="rosa">
+          <input type="radio" name="colorCaja" value="Rosa con moño rosa" id="cajaRosa">
+          <div><div class="opt-title">Rosa con moño rosa</div></div>
+        </div>
+        <div class="radio-opt" data-caja="blanca">
+          <input type="radio" name="colorCaja" value="Blanca con moño rojo" id="cajaBlanca">
+          <div><div class="opt-title">Blanca con moño rojo</div></div>
+        </div>
+        <div class="error-msg" id="err-caja">Elige el color de tu bolsa de regalo 🤍</div>
+      `;
+      cont.appendChild(cajaWrap);
+
+      cajaWrap.querySelectorAll('.radio-opt[data-caja]').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          cajaWrap.querySelectorAll('.radio-opt[data-caja]').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          opt.querySelector('input').checked = true;
+          document.getElementById('err-caja').style.display = 'none';
+        });
+      });
+    }
   });
 }
 
@@ -1052,15 +1075,6 @@ function toggleDetalleLlavero() {
     campoFotos.style.display = 'block';
   }
 }
-
-document.querySelectorAll('.radio-opt[data-caja]').forEach(opt => {
-  opt.addEventListener('click', () => {
-    document.querySelectorAll('.radio-opt[data-caja]').forEach(o => o.classList.remove('active'));
-    opt.classList.add('active');
-    opt.querySelector('input').checked = true;
-    document.getElementById('err-caja').style.display = 'none';
-  });
-});
 
 renderPiezas();
 renderOpciones();
