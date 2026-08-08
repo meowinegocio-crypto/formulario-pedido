@@ -817,7 +817,13 @@ function modeloOptions(n, prefix){
     const nombreModelo = `${prefix} #${i}`;
     const stock = inventarioStock.hasOwnProperty(nombreModelo) ? inventarioStock[nombreModelo] : null;
     const agotado = stock !== null && stock <= 0;
-    opts += `<option value="${nombreModelo}" ${agotado ? 'disabled' : ''}>${nombreModelo}${agotado ? ' — Agotado' : ''}</option>`;
+    let etiqueta = nombreModelo;
+    if(agotado){
+      etiqueta += ' — Agotado';
+    } else if(stock !== null){
+      etiqueta += ` (quedan ${stock})`;
+    }
+    opts += `<option value="${nombreModelo}" ${agotado ? 'disabled' : ''}>${etiqueta}</option>`;
   }
   return opts;
 }
