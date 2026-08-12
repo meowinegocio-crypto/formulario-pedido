@@ -187,6 +187,21 @@
     100% { transform: scale(1); }
   }
 
+  /* BOTÓN "ELEGIR ESTA OPCIÓN" - estado elegido con animación */
+  .elegir-btn.elegida{
+    background: linear-gradient(135deg, #25D366, #1aa650);
+    box-shadow: 0 8px 18px -8px rgba(37, 211, 102, .7);
+  }
+  @keyframes btnPulseOnce {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.08); }
+    60%  { transform: scale(0.97); }
+    100% { transform: scale(1); }
+  }
+  .elegir-btn.pulseOnce{
+    animation: btnPulseOnce 0.45s ease;
+  }
+
   /* PIEZA CARDS */
   .pieza-card{
     border:1.5px dashed #f0a9e0;
@@ -537,7 +552,7 @@
         <div style="font-weight:700; font-size:13px; color:var(--magenta); margin-bottom:6px;">💰 Costos extra a considerar:</div>
         <div style="font-size:12.5px; color:#7a4a6c; line-height:1.7;">
           · Encapsulado (foto sellada para siempre): +$20 MXN por pieza<br>
-          · Baño de plata: +$20 MXN por pieza<br>
+          · Algunos modelos llevan cargo extra (se ve en el número de modelo al elegirlo, se agrega solo)<br>
           · Entrega fuera de mi zona: +$20–30 MXN, se paga aparte al momento de la entrega
         </div>
       </div>
@@ -797,35 +812,64 @@ function cargarInventario(){
     .then(r => r.json())
     .then(data => {
       inventarioStock = data || {};
-      // vuelve a dibujar los selects de modelo ya cargados con la info fresca
-      document.querySelectorAll('.pieza-card').forEach(card => {
-        const acabadoBtn = card.querySelector('.acabado-row .toggle-btn.active');
-        if(acabadoBtn){
-          const select = card.querySelector('.modeloSelect');
-          const valorActual = select.value;
-          select.innerHTML = acabadoBtn.dataset.val === 'Oro' ? modeloOptions(9, 'Dorado') : modeloOptions(7, 'Plateado');
-          select.value = valorActual;
-        }
-      });
+      refreshAllModeloSelects();
     })
     .catch(()=>{});
 }
 
-function modeloOptions(n, prefix){
+// Cuenta cuántas veces está elegido cada modelo en las DEMÁS piezas del pedido actual
+// (para que "quedan X" baje en vivo si repites el mismo modelo en varias piezas)
+function contarModelosElegidos(excluirIdx){
+  const conteo = {};
+  document.querySelectorAll('.modeloSelect').forEach(sel => {
+    if(String(sel.dataset.idx) === String(excluirIdx)) return;
+    if(sel.value) conteo[sel.value] = (conteo[sel.value] || 0) + 1;
+  });
+  return conteo;
+}
+
+function modeloOptions(n, prefix, cardIdx){
+  const usadosEnOtrasPiezas = contarModelosElegidos(cardIdx);
   let opts = '<option value="">Selecciona…</option>';
   for(let i=1;i<=n;i++){
     const nombreModelo = `${prefix} #${i}`;
-    const stock = inventarioStock.hasOwnProperty(nombreModelo) ? inventarioStock[nombreModelo] : null;
-    const agotado = stock !== null && stock <= 0;
+    const info = inventarioStock.hasOwnProperty(nombreModelo) ? inventarioStock[nombreModelo] : null;
+    const stockBase = info !== null ? info.stock : null;
+    const cargoExtra = info !== null ? (info.extra || 0) : 0;
+    const usados = usadosEnOtrasPiezas[nombreModelo] || 0;
+    const stockEfectivo = stockBase !== null ? stockBase - usados : null;
+    const agotado = stockEfectivo !== null && stockEfectivo <= 0;
     let etiqueta = nombreModelo;
+    if(cargoExtra > 0){
+      etiqueta += ` (+$${cargoExtra})`;
+    }
     if(agotado){
       etiqueta += ' — Agotado';
-    } else if(stock !== null){
-      etiqueta += ` (quedan ${stock})`;
+    } else if(stockEfectivo !== null){
+      etiqueta += ` — quedan ${stockEfectivo}`;
     }
     opts += `<option value="${nombreModelo}" ${agotado ? 'disabled' : ''}>${etiqueta}</option>`;
   }
   return opts;
+}
+
+// Da el cargo extra ($) configurado en el Excel para un modelo, o 0 si no tiene
+function cargoExtraDeModelo(nombreModelo){
+  const info = inventarioStock.hasOwnProperty(nombreModelo) ? inventarioStock[nombreModelo] : null;
+  return info ? (info.extra || 0) : 0;
+}
+
+// Vuelve a dibujar TODOS los selects de modelo con la disponibilidad actualizada
+function refreshAllModeloSelects(){
+  document.querySelectorAll('.pieza-card').forEach(card => {
+    const idx = card.dataset.idx;
+    const acabadoBtn = card.querySelector('.acabado-row .toggle-btn.active');
+    if(!acabadoBtn) return;
+    const select = card.querySelector('.modeloSelect');
+    const valorActual = select.value;
+    select.innerHTML = acabadoBtn.dataset.val === 'Oro' ? modeloOptions(9, 'Dorado', idx) : modeloOptions(9, 'Plateado', idx);
+    select.value = valorActual;
+  });
 }
 
 function renderPiezas(){
@@ -888,7 +932,7 @@ function attachSinglePiezaListeners(card, i) {
       acabadoRow.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const select = card.querySelector('.modeloSelect');
-      select.innerHTML = btn.dataset.val === 'Oro' ? modeloOptions(9, 'Dorado') : modeloOptions(7, 'Plateado');
+      select.innerHTML = btn.dataset.val === 'Oro' ? modeloOptions(9, 'Dorado', i) : modeloOptions(9, 'Plateado', i);
       select.disabled = false;
 
       // Muestra solo el catálogo del acabado elegido (oro o plata)
@@ -902,6 +946,11 @@ function attachSinglePiezaListeners(card, i) {
         imgOro.classList.remove('show');
       }
     });
+  });
+
+  // Cuando elige/cambia el modelo de esta pieza, actualiza el "quedan X" de las demás
+  card.querySelector('.modeloSelect').addEventListener('change', () => {
+    refreshAllModeloSelects();
   });
 
   const encapRow = card.querySelector('.encap-row');
@@ -947,12 +996,29 @@ function renderOpciones(){
       <div class="opcion-incluye">${op.incluye.map(t=>'· '+t).join('<br>')}</div>
       ${op.nota ? `<div class="opcion-nota">${op.nota}</div>` : ''}
       <img class="catalog-img opcion-foto show" data-id="${op.id}" src="${op.img}" alt="Foto ${op.nombre}">
-      <button type="button" class="submit-btn" style="margin-top:12px; padding:10px; font-size:15px;">Elegir esta opción</button>
+      <button type="button" class="submit-btn elegir-btn" style="margin-top:12px; padding:10px; font-size:15px;">
+        ${selectedOpcion === op.id ? '✓ Opción elegida' : 'Elegir esta opción'}
+      </button>
     `;
+    if(selectedOpcion === op.id){
+      div.querySelector('.elegir-btn').classList.add('elegida');
+    }
     div.addEventListener('click', (e) => {
       selectedOpcion = op.id;
       document.querySelectorAll('.opcion-card').forEach(c=>c.classList.remove('active'));
+      document.querySelectorAll('.elegir-btn').forEach(b => {
+        b.classList.remove('elegida');
+        b.textContent = 'Elegir esta opción';
+      });
       div.classList.add('active');
+      const btn = div.querySelector('.elegir-btn');
+      btn.textContent = '✓ Opción elegida';
+      btn.classList.add('elegida');
+      // reinicia la animación de pulso aunque ya tuviera la clase
+      btn.classList.remove('pulseOnce');
+      void btn.offsetWidth; // fuerza el reinicio del CSS
+      btn.classList.add('pulseOnce');
+
       document.getElementById('err-opcion').style.display = 'none';
       renderPolaroids();
 
@@ -1053,6 +1119,13 @@ function toggleLlaveroOptions() {
 }
 document.querySelectorAll('input[name="quiereLlavero"]').forEach(radio => {
   radio.addEventListener('change', toggleLlaveroOptions);
+});
+// Igual que en "Entrega": tocar en cualquier parte de la fila marca la opción, no solo el circulito
+document.querySelectorAll('.radio-opt[data-llavero]').forEach(opt => {
+  opt.addEventListener('click', () => {
+    opt.querySelector('input[type="radio"]').checked = true;
+    toggleLlaveroOptions();
+  });
 });
 
 function updateDiscoPrecioHint(){
@@ -1220,6 +1293,11 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
   const ENCAPSULADO_PRICE = 20;
   const encapsuladoCosto = encapsuladoCount * ENCAPSULADO_PRICE;
 
+  // Cargo extra por modelo (ej. Plateado #5 = baño de plata): lo controla el Excel, no el código
+  const cargosPorModelo = modelosElegidos.map(m => ({ modelo: m, cargo: cargoExtraDeModelo(m) })).filter(x => x.cargo > 0);
+  const banoPlataCosto = cargosPorModelo.reduce((sum, x) => sum + x.cargo, 0);
+  const banoPlataCount = cargosPorModelo.length;
+
   const tieneLlavero = quiereLlaveroInput.value === 'si';
   const costoLlavero = tieneLlavero ? discoCount * 130 : 0;
   const discoPiezasTxt = discoCount === 1 ? "1 pieza" : discoCount + " piezas";
@@ -1238,13 +1316,16 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
     }
   }
 
-  const total = opcionPrecio + encapsuladoCosto + costoLlavero;
+  const total = opcionPrecio + encapsuladoCosto + banoPlataCosto + costoLlavero;
 
   const opcionTxt = `${opcionElegida.nombre} — $${opcionPrecio} MXN\n  · ${opcionElegida.incluye.join('\n  · ')}`
     + (colorCajaTxt ? `\n  · Color de bolsa: ${colorCajaTxt}` : '');
   const encapsuladoTxt = encapsuladoCount > 0
     ? `Encapsulado (${encapsuladoCount} pieza${encapsuladoCount>1?'s':''}): $${ENCAPSULADO_PRICE} c/u = $${encapsuladoCosto} MXN`
     : 'Sin encapsulado';
+  const banoPlataTxt = banoPlataCount > 0
+    ? `Cargo extra por modelo (${cargosPorModelo.map(x => x.modelo).join(', ')}): $${banoPlataCosto} MXN`
+    : '';
 
   const entregaTxt = entregaInput.value
     + (punto ? `\n  Punto: ${punto}` : '')
@@ -1258,7 +1339,7 @@ Número de piezas: ${count}
 ${piezasTxt.join('\n\n')}
 
 Empaque: ${opcionTxt}
-${encapsuladoTxt}
+${encapsuladoTxt}${banoPlataTxt ? '\n' + banoPlataTxt : ''}
 Llavero: ${llaveroTxt}
 Polaroids incluidas: ${opcionElegida.polaroidCount}
 
@@ -1275,7 +1356,8 @@ Entrega: ${entregaTxt}`;
 
   generarTicket({
     nombre, count, piezasTicket, opcionElegida, opcionPrecio,
-    encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, discoCount, llaveroTxt, entregaTxt, total
+    encapsuladoCount, encapsuladoCosto, banoPlataCount, banoPlataCosto,
+    tieneLlavero, costoLlavero, discoCount, llaveroTxt, entregaTxt, total
   });
 
 // === Registro automático en Google Sheets (Enviado en una sola petición) ===
@@ -1286,11 +1368,12 @@ Entrega: ${entregaTxt}`;
     {
       opcion: `${opcionElegida.nombre} - ${piezasTexto}`,
       precioLista: opcionPrecio,
-      totalCobrado: opcionPrecio + encapsuladoCosto,
+      totalCobrado: opcionPrecio + encapsuladoCosto + banoPlataCosto,
       costoExtraEncap: encapsuladoCount * COSTO_MATERIAL_ENCAPSULADO,
       modelos: modelosElegidos,
       notas: [
         encapsuladoCount > 0 ? `Incluye encapsulado x${encapsuladoCount}` : "",
+        banoPlataCount > 0 ? `Cargo extra: ${cargosPorModelo.map(x => x.modelo).join(', ')}` : "",
         colorCajaTxt ? `Caja: ${colorCajaTxt}` : ""
       ].filter(Boolean).join(" / ")
     }
@@ -1334,7 +1417,7 @@ function ticketLine(label, valor){
 }
 
 function generarTicket(data){
-  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, tieneLlavero, costoLlavero, discoCount, total} = data;
+  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, banoPlataCount, banoPlataCosto, tieneLlavero, costoLlavero, discoCount, total} = data;
 
   let piezasHTML = '';
   piezasTicket.forEach(p => {
@@ -1372,6 +1455,7 @@ function generarTicket(data){
     <div class="ticket-block">
       ${ticketLine('ENCAPSULADO' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
     </div>
+    ${banoPlataCount > 0 ? `<div class="ticket-block">${ticketLine('CARGO EXTRA (x' + banoPlataCount + ')', '$' + banoPlataCosto + ' MXN')}</div>` : ''}
     ${tieneLlavero ? `<div class="ticket-block">${ticketLine('LLAVERO DE DISCO x' + discoCount, '$' + costoLlavero + ' MXN')}</div>` : ''}
     <div class="ticket-stars">********************************</div>
     <div class="ticket-total">TOTAL&nbsp;&nbsp;&nbsp;&nbsp;$${total}.00 MXN</div>
