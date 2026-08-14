@@ -859,6 +859,32 @@ function cargoExtraDeModelo(nombreModelo){
   return info ? (info.extra || 0) : 0;
 }
 
+// Revisa si el modelo elegido en esta pieza es "una sola cara" (según el Excel) y ajusta la UI
+function esModeloUnaCara(nombreModelo){
+  const info = inventarioStock.hasOwnProperty(nombreModelo) ? inventarioStock[nombreModelo] : null;
+  return info ? !!info.unaFoto : false;
+}
+
+function aplicarRestriccionUnaCara(card, idx){
+  const modeloElegido = card.querySelector('.modeloSelect').value;
+  const esUnaCara = esModeloUnaCara(modeloElegido);
+  const aviso = card.querySelector('.una-cara-aviso');
+  const optDos = card.querySelector('.foto-dos');
+  const optUna = card.querySelector('.foto-opt[data-val="una"]');
+
+  if(esUnaCara){
+    aviso.style.display = 'block';
+    optDos.style.display = 'none';
+    // marca "Una sola foto" automático
+    optUna.querySelector('input').checked = true;
+    card.querySelectorAll('.foto-opt').forEach(o => o.classList.remove('active'));
+    optUna.classList.add('active');
+  } else {
+    aviso.style.display = 'none';
+    optDos.style.display = 'flex';
+  }
+}
+
 // Vuelve a dibujar TODOS los selects de modelo con la disponibilidad actualizada
 function refreshAllModeloSelects(){
   document.querySelectorAll('.pieza-card').forEach(card => {
@@ -904,7 +930,10 @@ function renderPiezas(){
       </div>
 
       <label class="field-label">Fotos para este relicario <span class="required">*</span></label>
-      <div class="radio-opt foto-opt" data-idx="${i}" data-val="dos">
+      <div class="una-cara-aviso" data-idx="${i}" style="display:none; margin-bottom:10px; padding:10px 12px; border-radius:12px; background:#fff0fb; border:1.5px solid var(--pink-hot); font-size:12.5px; color:var(--magenta); font-weight:600;">
+        📌 Este modelo es de una sola cara — solo lleva una foto.
+      </div>
+      <div class="radio-opt foto-opt foto-dos" data-idx="${i}" data-val="dos">
         <input type="radio" name="fotoOpcion${i}" value="dos">
         <div>
           <div class="opt-title">Dos fotos distintas</div>
@@ -949,8 +978,10 @@ function attachSinglePiezaListeners(card, i) {
   });
 
   // Cuando elige/cambia el modelo de esta pieza, actualiza el "quedan X" de las demás
+  // y ajusta la sección de fotos si el modelo es de una sola cara
   card.querySelector('.modeloSelect').addEventListener('change', () => {
     refreshAllModeloSelects();
+    aplicarRestriccionUnaCara(card, i);
   });
 
   const encapRow = card.querySelector('.encap-row');
