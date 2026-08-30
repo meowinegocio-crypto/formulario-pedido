@@ -19,25 +19,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
 
-/* Expande el contenido a lo ancho en computadoras */
-/* Color de fondo para toda la pantalla */
-body {
-  background: linear-gradient(180deg, #ffe3b3 0%, #ffdfa9 100%) !important;
-  background-color: #ffe3b3 !important;
-  margin: 0;
-  padding: 0;
-}
-
-/* Extiende las tarjetas y contenido mucho más a los lados en PC */
-@media (min-width: 768px) {
-  .hero-inner, form, .card, .wrap {
-    max-width: 96% !important;
-    width: 1400px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-  }
-}
-
   :root{
     --peach:#ffe3b3;
     --pink-mid:#ff8bf0;
@@ -49,16 +30,35 @@ body {
     --card-line:#f3d9ef;
   }
   *{box-sizing:border-box;}
+  html{
+    background: linear-gradient(180deg, var(--peach) 0%, #ffb4ee 32%, var(--pink-hot) 52%, #ffb8ef 74%, var(--pink-pale) 100%);
+  }
   body{
     margin:0;
     font-family:'Poppins',sans-serif;
     color:var(--ink);
     background:
-      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.5), transparent 60%),
+      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.55), transparent 60%),
       linear-gradient(180deg, var(--peach) 0%, #ffb4ee 32%, var(--pink-hot) 52%, #ffb8ef 74%, var(--pink-pale) 100%);
+    background-attachment: scroll;
     min-height:100vh;
   }
+
+  /* Imágenes siempre contenidas dentro de su tarjeta, nunca gigantes */
+  img{ max-width:100%; height:auto; }
+
   .wrap{max-width:640px;margin:0 auto;padding:0 18px 60px;}
+
+  /* En pantallas más grandes: contenedor un poco más ancho y centrado,
+     pero controlado (no se estiran las imágenes ni las tarjetas). */
+  @media (min-width:768px){
+    .wrap{max-width:720px;}
+    .card{padding:28px 34px;}
+    .catalog-img{max-width:460px;margin-left:auto;margin-right:auto;}
+  }
+  @media (min-width:1100px){
+    .wrap{max-width:760px;}
+  }
 
   /* HERO */
   .hero{
