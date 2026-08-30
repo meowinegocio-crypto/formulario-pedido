@@ -20,10 +20,10 @@
   <style>
 
   :root{
-    --blush:#fff1f7;
+    --rose:#ffc1de;
     --babypink:#ffd6ea;
-    --rose:#ffb3dd;
-    --dustyrose:#f39ec9;
+    --blush:#ffeaf4;
+    --blushpale:#fff5fa;
     --pink-mid:#ff8bf0;
     --pink-hot:#ff5fe0;
     --magenta:#d6198f;
@@ -33,15 +33,15 @@
   }
   *{box-sizing:border-box;}
   html{
-    background: linear-gradient(180deg, var(--blush) 0%, var(--babypink) 32%, var(--rose) 62%, var(--dustyrose) 100%);
+    background: linear-gradient(180deg, var(--rose) 0%, var(--babypink) 38%, var(--blush) 72%, var(--blushpale) 100%);
   }
   body{
     margin:0;
     font-family:'Poppins',sans-serif;
     color:var(--ink);
     background:
-      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.6), transparent 60%),
-      linear-gradient(180deg, var(--blush) 0%, var(--babypink) 32%, var(--rose) 62%, var(--dustyrose) 100%);
+      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.35), transparent 60%),
+      linear-gradient(180deg, var(--rose) 0%, var(--babypink) 38%, var(--blush) 72%, var(--blushpale) 100%);
     background-attachment: scroll;
     min-height:100vh;
   }
@@ -60,46 +60,51 @@
     .catalog-img{max-width:460px;margin-left:auto;margin-right:auto;}
   }
 
-  /* ===== DESKTOP "SITIO WEB": barra superior + layout de 2 columnas ===== */
+  /* ===== Barra superior tipo sitio web (móvil compacta + desktop completa) ===== */
   .site-topbar{
+    display:flex;
+    justify-content:center;
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(255,255,255,.86);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1.5px solid #f6dcef;
+    box-shadow:0 2px 18px -10px rgba(150,20,120,.22);
+  }
+  .site-topbar-inner{
+    width:100%;
+    max-width:1180px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 16px;
+  }
+  .site-topbar-logo{width:26px; height:26px; object-fit:contain; margin:0; flex-shrink:0;}
+  .site-topbar-name{
+    font-family:'Playfair Display',serif;
+    font-weight:900;
+    font-size:15.5px;
+    color:var(--magenta);
+    white-space:nowrap;
+  }
+  .site-topbar-tag{
     display:none;
+    font-size:12px;
+    font-weight:600;
+    color:#8a6079;
+    border-left:1.5px solid #f0cdea;
+    padding-left:12px;
+    margin-left:2px;
+  }
+  @media (min-width:480px){
+    .site-topbar-tag{display:inline;}
   }
   @media (min-width:1000px){
-    .site-topbar{
-      display:flex;
-      justify-content:center;
-      position:sticky;
-      top:0;
-      z-index:50;
-      background:rgba(255,255,255,.82);
-      backdrop-filter:blur(10px);
-      -webkit-backdrop-filter:blur(10px);
-      border-bottom:1.5px solid #f6dcef;
-      box-shadow:0 2px 18px -8px rgba(150,20,120,.18);
-    }
-    .site-topbar-inner{
-      width:100%;
-      max-width:1180px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:10px 24px;
-    }
-    .site-topbar-logo{width:34px; height:34px; object-fit:contain; margin:0;}
-    .site-topbar-name{
-      font-family:'Playfair Display',serif;
-      font-weight:900;
-      font-size:19px;
-      color:var(--magenta);
-    }
-    .site-topbar-tag{
-      font-size:12px;
-      font-weight:600;
-      color:#8a6079;
-      border-left:1.5px solid #f0cdea;
-      padding-left:12px;
-      margin-left:2px;
-    }
+    .site-topbar-inner{padding:10px 24px; gap:12px;}
+    .site-topbar-logo{width:34px; height:34px;}
+    .site-topbar-name{font-size:19px;}
 
     .wrap{
       max-width:1180px;
@@ -260,6 +265,14 @@
     padding:22px 20px;
     margin-bottom:16px;
     box-shadow:0 10px 30px -14px rgba(150,20,120,.25);
+    animation: cardIn .5s ease both;
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card{ animation:none; }
   }
   .card h2{
     font-family:'Playfair Display',serif;
@@ -744,7 +757,7 @@
     </div>
     <div class="hero-inner">
       <div class="eyebrow">Realiza tu pedido aqui</div>
-    <img src="Logo.png" alt="Lavibee Logo" style="width: 280px; max-width: 90%; margin: 15px auto; display: block;">
+    <img src="Logo.png" alt="Lavibee Logo" style="width: 220px; max-width: 78%; margin: 15px auto; display: block; filter: drop-shadow(0 8px 20px rgba(150,20,120,.25));">
       <div class="subtitle">Checa nuestros precios y paquetes</div>
       <p class="hero-note">Llena tus datos y las piezas que quieres. Al final te armamos el resumen para enviarlo por WhatsApp 💌</p>
     </div>
