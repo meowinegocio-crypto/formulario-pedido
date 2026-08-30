@@ -1240,7 +1240,7 @@ cargarInventario();
 // Costo aproximado del material del encapsulado (resina). Ajusta este número si cambia el costo en tu Excel.
 const COSTO_MATERIAL_ENCAPSULADO = 2.26;
 
-function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal, etiquetaImgBase64) {
+function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal, etiquetaImgBase64, ticketImgBase64) {
   const payload = {
     cliente: nombreCliente,
     entrega: entregaTexto.replace(/\n/g, " / "),
@@ -1249,6 +1249,9 @@ function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal, 
   };
   if(etiquetaImgBase64){
     payload.etiquetaImg = etiquetaImgBase64;
+  }
+  if(ticketImgBase64){
+    payload.ticketImg = ticketImgBase64;
   }
 
   fetch(SHEET_WEBHOOK_URL, {
@@ -1312,6 +1315,16 @@ function generarEtiquetaImagen(nombre, direccion, referencias, telefono){
   });
 }
   
+// Convierte el ticket ya generado (#ticketBox) en imagen PNG base64. Devuelve una Promise.
+function generarTicketImagen(){
+  return new Promise((resolve) => {
+    const ticket = document.getElementById('ticketBox');
+    html2canvas(ticket, {backgroundColor:'#F7F2E4', scale:2}).then(canvas => {
+      resolve(canvas.toDataURL('image/png'));
+    }).catch(() => resolve(null));
+  });
+}
+
 document.getElementById('pedidoForm').addEventListener('submit', function(e){
   e.preventDefault();
 
@@ -1547,15 +1560,16 @@ Forma de pago: ${formaPagoVal}`;
     const waAvisoUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(avisoTexto)}`;
     // Se abre en una pestaña nueva automáticamente para que llegue directo a tu WhatsApp
     window.open(waAvisoUrl, '_blank');
-
-    // Genera la etiqueta con tu logo y la manda junto con el registro de venta,
-    // para que tu Apps Script te la mande por correo con la imagen adjunta.
-    generarEtiquetaImagen(nombre, direccion, referencias, telefono).then(etiquetaImgBase64 => {
-      registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal, etiquetaImgBase64);
-    });
-  } else {
-    registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal, null);
   }
+
+  // Siempre se genera el ticket como imagen; la etiqueta solo si es Didi.
+  // Ambas (las que apliquen) se mandan juntas en el mismo correo.
+  Promise.all([
+    generarTicketImagen(),
+    entregaInput.value === 'Entrega con Didi' ? generarEtiquetaImagen(nombre, direccion, referencias, telefono) : Promise.resolve(null)
+  ]).then(([ticketImgBase64, etiquetaImgBase64]) => {
+    registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal, etiquetaImgBase64, ticketImgBase64);
+  });
   // === Fin registro automático + aviso ===
 
   submitBtnEarly.textContent = 'Pedido enviado ✓';
