@@ -15,20 +15,29 @@
 
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
+
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  
+  
+  <style>
+
+
+    body {
+  background-color: #ffe3b3; /* Restaura tu fondo peach original */
+}
+
+/* Expande el contenido a lo ancho en computadoras */
 @media (min-width: 768px) {
-  .hero-inner, #pedidoForm {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+  .wrap, form, .card {
+    max-width: 90% !important;
+    width: 1000px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 }
 
-  .hero, form {
-    width: 100%;
-    max-width: 650px;
-  }
+ 
 }
   :root{
     --peach:#ffe3b3;
