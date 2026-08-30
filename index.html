@@ -444,81 +444,100 @@
     line-height:1.5;
   }
 
-  /* TICKET */
+  /* TICKET - estilo postal / Canva */
   .ticket{
-    background:#fbf6ee;
-    border:1px solid #ddd0bb;
-    border-radius:4px;
-    padding:26px 22px;
-    font-family:'Courier New', monospace;
-    color:#2b2b2b;
-    font-size:12.5px;
-    line-height:1.55;
+    position:relative;
+    background:#F7F2E4;
+    border:3px dashed var(--pink-hot);
+    border-radius:10px;
+    padding:26px 24px 24px;
+    font-family:'Poppins',sans-serif;
+    color:#1a1a1a;
+    font-size:13px;
+    line-height:1.5;
+    overflow:hidden;
+  }
+  .ticket-corner{
+    position:absolute;
+    top:38px;
+    right:-34px;
+    transform:rotate(38deg);
+    color:var(--pink-hot);
+    font-weight:800;
+    font-size:11px;
+    letter-spacing:2px;
+    white-space:nowrap;
   }
   .ticket-logo{
     text-align:center;
-    margin-bottom:4px;
+    margin-bottom:2px;
   }
-  .ticket-logo .lv{
-    font-family:'Playfair Display',serif;
-    font-weight:900;
-    font-size:26px;
-    font-style:italic;
-    background:linear-gradient(135deg, var(--pink-hot), var(--magenta));
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    letter-spacing:1px;
-  }
-  .ticket-logo .tag{
-    font-family:'Poppins',sans-serif;
-    font-weight:700;
-    font-size:9px;
-    letter-spacing:2px;
-    color:var(--magenta);
+  .ticket-logo img{
+    height:64px;
   }
   .ticket-title{
     text-align:center;
-    font-weight:700;
+    font-weight:800;
     font-size:12.5px;
-    letter-spacing:1px;
-    margin:10px 0 14px;
+    letter-spacing:1.5px;
+    margin:8px 0 14px;
+    color:#1a1a1a;
+    text-transform:uppercase;
   }
   .ticket hr{
     border:none;
-    border-top:1px dashed #b3a488;
-    margin:10px 0;
+    border-top:2px dashed var(--pink-hot);
+    margin:12px 0;
   }
-  .ticket-block{margin-bottom:10px;}
+  .ticket-block{
+    margin-bottom:12px;
+    padding-bottom:10px;
+    border-bottom:1.5px dashed #f0b8de;
+  }
+  .ticket-block:last-of-type{
+    border-bottom:none;
+  }
   .ticket-line{
     display:flex;
     align-items:flex-end;
     gap:6px;
     white-space:pre;
+    font-weight:700;
   }
   .ticket-line .dots{
     flex:1;
-    border-bottom:1px dashed #b3a488;
+    border-bottom:1px dotted #c99ab8;
     margin-bottom:3px;
   }
   .ticket-total{
     text-align:center;
-    font-weight:700;
-    font-size:18px;
+    font-weight:800;
+    font-size:19px;
     margin:14px 0;
     letter-spacing:1px;
+    color:#1a1a1a;
   }
   .ticket-stars{
     text-align:center;
-    letter-spacing:2px;
-    color:#8a7c62;
+    letter-spacing:3px;
+    color:var(--pink-hot);
     font-size:11px;
   }
   .ticket-footer{
     text-align:center;
-    margin-top:14px;
-    font-size:10.5px;
+    margin-top:16px;
+    font-size:11px;
     color:#4a4a4a;
+  }
+  .ticket-visitus{
+    display:inline-block;
+    border:2.5px solid #1a1a1a;
+    border-radius:100px;
+    padding:5px 18px;
+    font-weight:800;
+    font-size:11px;
+    letter-spacing:1px;
+    margin-bottom:8px;
   }
 </style>
 </head>
@@ -703,6 +722,10 @@
         <input type="text" id="referencias" placeholder="Ej: casa azul, portón negro, frente al CETIS 3, timbre 2">
         <p class="punto-nota">🛵 Esto ayuda muchísimo al de Didi a encontrar tu casa rápido: color de fachada, número visible, entre qué calles, un local conocido cerca, etc.</p>
         <div class="error-msg" id="err-referencias">Escribe una referencia para que te encuentren fácil 🤍</div>
+
+        <label class="field-label" for="telefono">Teléfono (opcional)</label>
+        <input type="tel" id="telefono" placeholder="Ej: 55 1234 5678">
+        <p class="punto-nota">📱 Solo por si el repartidor de Didi necesita llamarte para encontrar tu domicilio. No es obligatorio.</p>
       </div>
       <div class="error-msg" id="err-entrega">Elige una opción de entrega 🤍</div>
     </div>
@@ -1241,7 +1264,7 @@ function registrarVentas(itemsVenta, nombreCliente, entregaTexto, formaPagoVal, 
 }
 
 // Arma el HTML de la etiqueta con el estilo de la marca (mismo diseño que las etiquetas en PDF)
-function construirHTMLEtiqueta(nombre, direccion, referencias){
+function construirHTMLEtiqueta(nombre, direccion, referencias, telefono){
   return `
     <div style="width:566px; background:#FFF6FA; border:3px solid #ED008C; border-radius:22px; overflow:hidden; font-family:'Poppins',sans-serif; position:relative;">
       <div style="background:#FADCE9; padding:18px 0 10px; text-align:center;">
@@ -1254,6 +1277,7 @@ function construirHTMLEtiqueta(nombre, direccion, referencias){
         <div style="color:#ED008C; font-weight:800; font-size:15px; margin-bottom:14px;">&gt;&gt; ENTREGA CON DIDI &lt;&lt;</div>
         <div style="font-size:13px; color:#1A1A1A; background:#FADCE9; border-radius:10px; padding:10px 12px; line-height:1.5;">
           <b>Referencias:</b> ${escapeHtml(referencias)}
+          ${telefono ? `<br><b>Teléfono:</b> ${escapeHtml(telefono)}` : ''}
         </div>
       </div>
       <div style="position:absolute; bottom:0; left:0; right:0; background:#ED008C; color:#fff; padding:14px 28px;">
@@ -1265,13 +1289,13 @@ function construirHTMLEtiqueta(nombre, direccion, referencias){
 }
 
 // Genera la etiqueta como imagen (PNG en base64) usando html2canvas. Devuelve una Promise.
-function generarEtiquetaImagen(nombre, direccion, referencias){
+function generarEtiquetaImagen(nombre, direccion, referencias, telefono){
   return new Promise((resolve) => {
     const host = document.createElement('div');
     host.style.position = 'fixed';
     host.style.left = '-9999px';
     host.style.top = '0';
-    host.innerHTML = construirHTMLEtiqueta(nombre, direccion, referencias);
+    host.innerHTML = construirHTMLEtiqueta(nombre, direccion, referencias, telefono);
     document.body.appendChild(host);
 
     // Pequeña espera para asegurar que el logo (base64) ya esté pintado antes de capturar
@@ -1324,6 +1348,7 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
 
   let direccion = '';
   let referencias = '';
+  let telefono = '';
   let punto = '';
   if(entregaInput && entregaInput.value === 'Entrega con Didi'){
     direccion = document.getElementById('direccion').value.trim();
@@ -1335,6 +1360,8 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
     document.getElementById('referencias').classList.toggle('error', !referencias);
     document.getElementById('err-referencias').style.display = referencias ? 'none' : 'block';
     if(!referencias) valid = false;
+
+    telefono = document.getElementById('telefono').value.trim();
   }
   if(entregaInput && entregaInput.value === 'Recoger en punto de entrega'){
     punto = document.getElementById('puntoEntrega').value;
@@ -1442,7 +1469,8 @@ document.getElementById('pedidoForm').addEventListener('submit', function(e){
   const entregaTxt = entregaInput.value
     + (punto ? `\n  Punto: ${punto}` : '')
     + (direccion ? `\n  Dirección: ${direccion}` : '')
-    + (referencias ? `\n  Referencias: ${referencias}` : '');
+    + (referencias ? `\n  Referencias: ${referencias}` : '')
+    + (telefono ? `\n  Teléfono: ${telefono}` : '');
 
   const resumenRaw =
 `✨ PEDIDO LAVIBEE.MX ✨
@@ -1509,7 +1537,7 @@ Entrega: ${entregaTxt}`;
 
 PARA: ${nombre}
 DIRECCIÓN: ${direccion}
-REFERENCIAS: ${referencias}
+REFERENCIAS: ${referencias}${telefono ? '\nTELÉFONO: ' + telefono : ''}
 
 ${resumenRaw}
 
@@ -1522,7 +1550,7 @@ Forma de pago: ${formaPagoVal}`;
 
     // Genera la etiqueta con tu logo y la manda junto con el registro de venta,
     // para que tu Apps Script te la mande por correo con la imagen adjunta.
-    generarEtiquetaImagen(nombre, direccion, referencias).then(etiquetaImgBase64 => {
+    generarEtiquetaImagen(nombre, direccion, referencias, telefono).then(etiquetaImgBase64 => {
       registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal, etiquetaImgBase64);
     });
   } else {
@@ -1561,45 +1589,39 @@ function generarTicket(data){
   piezasTicket.forEach(p => {
     piezasHTML += `
       <div class="ticket-block">
-        RELICARIO ${p.idx}:<br>
-        &nbsp;· ACABADO: ${escapeHtml(p.acabado.toUpperCase())}<br>
-        &nbsp;· MODELO: ${escapeHtml(p.modelo.toUpperCase())}<br>
-        ${ticketLine('&nbsp;· ENCAPSULADO: ' + escapeHtml(p.encap.toUpperCase()), p.encap === 'Sí' ? '$20 MXN' : '')}
-        &nbsp;· FOTOS: ${escapeHtml(p.fotos.toUpperCase())}
+        Relicario ${p.idx} ${escapeHtml(p.acabado)} · Modelo ${escapeHtml(p.modelo)}${p.encap === 'Sí' ? ' · Encapsulado' : ''}<br>
+        ${escapeHtml(p.fotos)}
       </div>`;
   });
 
-  const incluyeHTML = opcionElegida.incluye.map(t => `&nbsp;· ${escapeHtml(t.toUpperCase())}`).join('<br>');
+  const incluyeHTML = opcionElegida.incluye.map(t => `· ${escapeHtml(t)}`).join('<br>');
 
   document.getElementById('ticketBox').innerHTML = `
+    <div class="ticket-corner">GRACIAS POR TU COMPRA</div>
     <div class="ticket-logo">
-      <div class="lv">La Vibe</div>
-      <div class="tag">COSITAS LINDAS</div>
+      <img src="${LOGO_BASE64}" alt="La Vibe">
     </div>
-    <div class="ticket-title">TICKET DE COMPRA</div>
-    <hr>
+    <div class="ticket-title">Ticket de compra</div>
     <div class="ticket-block">
-      ✨ PEDIDO LA VIBE ✨<br>
-      NOMBRE: ${escapeHtml(nombre.toUpperCase())}<br>
-      NÚMERO DE PIEZAS: ${count}
+      ✨ PEDIDO LAVIBEE.MX ✨<br>
+      Nombre: ${escapeHtml(nombre)}<br>
+      Número de piezas: ${count}
     </div>
-    <hr>
     ${piezasHTML}
-    <hr>
     <div class="ticket-block">
-      ${ticketLine('EMPAQUE: ' + escapeHtml(opcionElegida.nombre.toUpperCase()), '$' + opcionPrecio + ' MXN')}
+      Empaque: ${escapeHtml(opcionElegida.nombre)} — $${opcionPrecio} MXN<br>
       ${incluyeHTML}
     </div>
     <div class="ticket-block">
-      ${ticketLine('ENCAPSULADO' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
+      ${ticketLine('Encapsulado' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
+      ${banoPlataCount > 0 ? ticketLine('Cargo extra (x' + banoPlataCount + ')', '$' + banoPlataCosto + ' MXN') : ''}
     </div>
-    ${banoPlataCount > 0 ? `<div class="ticket-block">${ticketLine('CARGO EXTRA (x' + banoPlataCount + ')', '$' + banoPlataCosto + ' MXN')}</div>` : ''}
-    ${tieneLlavero ? `<div class="ticket-block">${ticketLine('LLAVERO DE DISCO x' + discoCount, '$' + costoLlavero + ' MXN')}</div>` : ''}
-    <div class="ticket-stars">********************************</div>
-    <div class="ticket-total">TOTAL&nbsp;&nbsp;&nbsp;&nbsp;$${total}.00 MXN</div>
-    <div class="ticket-stars">********************************</div>
+    ${tieneLlavero ? `<div class="ticket-block">Llaveros Kit Disco / Llavero mini CD — ${discoCount} pieza${discoCount>1?'s':''} ($${costoLlavero} MXN)</div>` : ''}
+    <div class="ticket-stars">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
+    <div class="ticket-total">TOTAL $${total}.00 MXN</div>
+    <div class="ticket-stars">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
     <div class="ticket-footer">
-      VISIT US!<br>
+      <span class="ticket-visitus">VISIT US!</span><br>
       Facebook @Vibe Sweet<br>
       Instagram @lavibee.mx
     </div>
