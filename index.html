@@ -17,28 +17,27 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  
-  
   <style>
 
-
-    body {
-  background-color: #ffe3b3; /* Restaura tu fondo peach original */
+/* Expande el contenido a lo ancho en computadoras */
+/* Color de fondo para toda la pantalla */
+body {
+  background: linear-gradient(180deg, #ffe3b3 0%, #ffdfa9 100%) !important;
+  background-color: #ffe3b3 !important;
+  margin: 0;
+  padding: 0;
 }
 
-/* Expande el contenido a lo ancho en computadoras */
+/* Extiende las tarjetas y contenido mucho más a los lados en PC */
 @media (min-width: 768px) {
-  .wrap, form, .card {
-    max-width: 90% !important;
-    width: 1000px !important;
+  .hero-inner, form, .card, .wrap {
+    max-width: 96% !important;
+    width: 1400px !important;
     margin-left: auto !important;
     margin-right: auto !important;
   }
 }
 
- 
-}
   :root{
     --peach:#ffe3b3;
     --pink-mid:#ff8bf0;
