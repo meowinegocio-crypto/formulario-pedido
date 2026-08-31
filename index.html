@@ -20,6 +20,7 @@
   <style>
 
   :root{
+    --peach:#ffe3b3;
     --rose:#ffc1de;
     --babypink:#ffd6ea;
     --blush:#ffeaf4;
@@ -33,7 +34,7 @@
   }
   *{box-sizing:border-box;}
   html{
-    background: linear-gradient(180deg, var(--rose) 0%, var(--babypink) 38%, var(--blush) 72%, var(--blushpale) 100%);
+    background: linear-gradient(180deg, var(--peach) 0%, var(--rose) 30%, var(--babypink) 58%, var(--blush) 82%, var(--blushpale) 100%);
   }
   body{
     margin:0;
@@ -41,7 +42,7 @@
     color:var(--ink);
     background:
       radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.35), transparent 60%),
-      linear-gradient(180deg, var(--rose) 0%, var(--babypink) 38%, var(--blush) 72%, var(--blushpale) 100%);
+      linear-gradient(180deg, var(--peach) 0%, var(--rose) 30%, var(--babypink) 58%, var(--blush) 82%, var(--blushpale) 100%);
     background-attachment: scroll;
     min-height:100vh;
   }
@@ -1461,21 +1462,51 @@ function actualizarResumenLateral(){
   const op = PACKAGE_OPTIONS.find(o => o.id === selectedOpcion);
   if(!op){ return; }
 
-  const precio = priceForCount(op, count);
+  const basePrecio = priceForCount(op, count);
   const piezasTxt = count === 1 ? '1 relicario' : count + ' relicarios';
 
+  // Encapsulado + cargo extra por modelo (baño de plata, etc.), leídos de cada pieza ya configurada
+  const ENCAPSULADO_PRICE = 20;
+  let encapsuladoCount = 0;
+  let banoPlataCosto = 0;
+  let banoPlataCount = 0;
+
+  document.querySelectorAll('.pieza-card').forEach(card => {
+    const encapBtn = card.querySelector('.encap-row .toggle-btn.active');
+    if(encapBtn && encapBtn.dataset.val === 'Sí') encapsuladoCount++;
+
+    const modeloSel = card.querySelector('.modeloSelect');
+    const modelo = modeloSel ? modeloSel.value : null;
+    if(modelo){
+      const cargo = cargoExtraDeModelo(modelo);
+      if(cargo > 0){ banoPlataCosto += cargo; banoPlataCount++; }
+    }
+  });
+  const encapsuladoCosto = encapsuladoCount * ENCAPSULADO_PRICE;
+
+  // Llavero disco
   const llaveroInput = document.querySelector('input[name="quiereLlavero"]:checked');
   const quiereLlavero = llaveroInput && llaveroInput.value === 'si';
+  const costoLlavero = quiereLlavero ? discoCount * 130 : 0;
 
-  let filas = `<div class="side-row"><span>Piezas</span><span>${piezasTxt}</span></div>`;
+  const total = basePrecio + encapsuladoCosto + banoPlataCosto + costoLlavero;
+
+  let filas = `<div class="side-row"><span>Empaque base</span><span>$${basePrecio}</span></div>`;
+  filas += `<div class="side-row"><span>Piezas</span><span>${piezasTxt}</span></div>`;
+  if(encapsuladoCount > 0){
+    filas += `<div class="side-row"><span>Encapsulado ×${encapsuladoCount}</span><span>$${encapsuladoCosto}</span></div>`;
+  }
+  if(banoPlataCount > 0){
+    filas += `<div class="side-row"><span>Cargo extra ×${banoPlataCount}</span><span>$${banoPlataCosto}</span></div>`;
+  }
   if(quiereLlavero){
     const discoTxt = discoCount === 1 ? '1 pieza' : discoCount + ' piezas';
-    filas += `<div class="side-row"><span>Llavero disco</span><span>${discoTxt}</span></div>`;
+    filas += `<div class="side-row"><span>Llavero disco (${discoTxt})</span><span>$${costoLlavero}</span></div>`;
   }
 
   body.innerHTML = `
     <div class="side-pkg-name">${op.nombre}</div>
-    <div class="side-pkg-price">$${precio} <small>MXN — base</small></div>
+    <div class="side-pkg-price">$${total} <small>MXN aprox.</small></div>
     ${filas}
   `;
 }
