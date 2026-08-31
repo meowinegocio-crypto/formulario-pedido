@@ -20,7 +20,8 @@
   <style>
 
   :root{
-    --peach:#ffe3b3;
+    --mint:#e3f7b8;
+    --cream:#f6efd2;
     --rose:#ffc1de;
     --babypink:#ffd6ea;
     --blush:#ffeaf4;
@@ -34,15 +35,15 @@
   }
   *{box-sizing:border-box;}
   html{
-    background: linear-gradient(180deg, var(--blushpale) 0%, var(--blush) 18%, var(--babypink) 42%, var(--rose) 70%, var(--peach) 100%);
+    background: linear-gradient(180deg, var(--mint) 0%, var(--cream) 38%, var(--babypink) 72%, var(--rose) 100%);
   }
   body{
     margin:0;
     font-family:'Poppins',sans-serif;
     color:var(--ink);
     background:
-      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.35), transparent 60%),
-      linear-gradient(180deg, var(--blushpale) 0%, var(--blush) 18%, var(--babypink) 42%, var(--rose) 70%, var(--peach) 100%);
+      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.3), transparent 60%),
+      linear-gradient(180deg, var(--mint) 0%, var(--cream) 38%, var(--babypink) 72%, var(--rose) 100%);
     background-attachment: scroll;
     min-height:100vh;
   }
@@ -637,7 +638,7 @@
     background:#F7F1E3;
     border:2.5px dashed var(--pink-hot);
     border-radius:14px;
-    padding:22px 22px 18px;
+    padding:20px 20px 18px;
     font-family:'Poppins',sans-serif;
     color:#1a1a1a;
     font-size:12.5px;
@@ -646,54 +647,43 @@
   }
   .ticket-corner{
     position:absolute;
-    top:34px;
-    right:-36px;
+    top:14px;
+    right:-38px;
     transform:rotate(38deg);
     color:var(--pink-hot);
     font-weight:800;
-    font-size:10.5px;
-    letter-spacing:2px;
+    font-size:10px;
+    letter-spacing:1.5px;
     white-space:nowrap;
+  }
+  .ticket-corner .star{
+    display:block;
+    text-align:center;
+    font-size:15px;
+    margin-top:2px;
+  }
+  .ticket-tdc{
+    position:absolute;
+    top:16px;
+    left:18px;
+    font-family:'Playfair Display',serif;
+    font-weight:800;
+    font-size:12px;
+    line-height:1.25;
+    letter-spacing:.5px;
+    color:#1a1a1a;
+    text-transform:uppercase;
   }
   .ticket-header{
     text-align:center;
-    margin-bottom:6px;
+    margin-bottom:2px;
   }
   .ticket-logo{
     text-align:center;
     margin-bottom:0;
   }
   .ticket-logo img{
-    height:92px;
-  }
-  .ticket-brand{
-    font-family:'Playfair Display',serif;
-    font-weight:900;
-    font-size:22px;
-    letter-spacing:1px;
-    color:var(--magenta);
-    margin-top:-6px;
-  }
-  .ticket-tagline{
-    font-family:'Dancing Script',cursive;
-    font-weight:700;
-    font-size:16px;
-    color:var(--pink-hot);
-    margin-top:-4px;
-  }
-  .ticket-title{
-    text-align:center;
-    font-weight:800;
-    font-size:11.5px;
-    letter-spacing:2px;
-    margin:10px 0 12px;
-    color:#1a1a1a;
-    text-transform:uppercase;
-  }
-  .ticket hr{
-    border:none;
-    border-top:1.5px dashed var(--pink-hot);
-    margin:10px 0;
+    height:150px;
   }
   .ticket-block{
     margin-bottom:9px;
@@ -715,23 +705,31 @@
     border-bottom:1px dotted #c99ab8;
     margin-bottom:3px;
   }
+  .ticket-mono{
+    font-family:'Courier New', 'Courier Prime', monospace;
+  }
   .ticket-total{
     text-align:center;
-    font-weight:800;
-    font-size:19px;
+    font-weight:700;
+    font-size:24px;
     margin:10px 0;
     letter-spacing:1px;
     color:#1a1a1a;
   }
   .ticket-stars{
     text-align:center;
-    letter-spacing:3px;
-    color:var(--pink-hot);
-    font-size:11px;
+    color:#1a1a1a;
+    font-size:13px;
+    letter-spacing:1px;
+    overflow:hidden;
+    white-space:nowrap;
   }
   .ticket-footer{
-    text-align:center;
-    margin-top:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    margin-top:16px;
     font-size:11px;
     color:#4a4a4a;
   }
@@ -739,11 +737,10 @@
     display:inline-block;
     border:2.5px solid #1a1a1a;
     border-radius:100px;
-    padding:5px 18px;
-    font-weight:800;
-    font-size:11px;
+    padding:6px 20px;
+    font-weight:700;
+    font-size:14px;
     letter-spacing:1px;
-    margin-bottom:8px;
   }
 </style>
 </head>
@@ -1916,15 +1913,13 @@ function generarTicket(data){
   const incluyeHTML = opcionElegida.incluye.map(t => `· ${escapeHtml(t)}`).join('<br>');
 
   document.getElementById('ticketBox').innerHTML = `
-    <div class="ticket-corner">GRACIAS POR TU COMPRA</div>
+    <div class="ticket-tdc">TICKET<br>DE<br>COMPRA</div>
+    <div class="ticket-corner">GRACIAS POR TU COMPRA<span class="star">✳</span></div>
     <div class="ticket-header">
       <div class="ticket-logo">
         <img src="${LOGO_BASE64}" alt="La Vibe">
       </div>
-      <div class="ticket-brand">LA VIBE</div>
-      <div class="ticket-tagline">cositas lindas</div>
     </div>
-    <div class="ticket-title">Ticket de compra</div>
     <div class="ticket-block">
       ✨ PEDIDO LAVIBEE.MX ✨<br>
       Nombre: ${escapeHtml(nombre)}<br>
@@ -1940,13 +1935,12 @@ function generarTicket(data){
       ${banoPlataCount > 0 ? ticketLine('Cargo extra (x' + banoPlataCount + ')', '$' + banoPlataCosto + ' MXN') : ''}
     </div>
     ${tieneLlavero ? `<div class="ticket-block">Llaveros Kit Disco / Llavero mini CD — ${discoCount} pieza${discoCount>1?'s':''} ($${costoLlavero} MXN)</div>` : ''}
-    <div class="ticket-stars">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
-    <div class="ticket-total">TOTAL $${total}.00 MXN</div>
-    <div class="ticket-stars">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>
+    <div class="ticket-stars ticket-mono">************************************</div>
+    <div class="ticket-total ticket-mono">TOTAL $${total}.00 MXN</div>
+    <div class="ticket-stars ticket-mono">************************************</div>
     <div class="ticket-footer">
-      <span class="ticket-visitus">VISIT US!</span><br>
-      Facebook @Vibe Sweet<br>
-      Instagram @lavibee.mx
+      <span class="ticket-visitus ticket-mono">VISIT US!</span>
+      <span class="ticket-mono">Facebook @Vibe Sweet<br>Instagram @lavibee.mx</span>
     </div>
   `;
 
