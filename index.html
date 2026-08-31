@@ -16,7 +16,7 @@
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Anton&display=swap" rel="stylesheet">
   <style>
 
   :root{
@@ -741,6 +741,87 @@
   .ticket-visitus-img{
     height:38px;
     display:block;
+  }
+
+  /* ===== Banner "Gracias por tu compra" (reemplaza el ticket detallado en pantalla) ===== */
+  .thanks-banner{
+    position:relative;
+    max-width:380px;
+    min-height:560px;
+    margin:0 auto;
+    border-radius:14px;
+    overflow:hidden;
+    background:
+      linear-gradient(180deg,
+        var(--rose) 0%, var(--rose) 15%,
+        #ffffff 15%, #ffffff 80%,
+        var(--rose) 80%, var(--rose) 100%);
+    padding:28px 22px 24px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .thanks-seal{
+    position:absolute;
+    top:56px;
+    right:6px;
+    width:64px;
+    height:auto;
+  }
+  .thanks-logo img{
+    height:180px;
+    margin-top:-8px;
+  }
+  .thanks-headline{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    font-size:26px;
+    letter-spacing:1px;
+    color:#1a1a1a;
+    text-transform:uppercase;
+    margin:2px 0 14px;
+  }
+  .thanks-message{
+    font-size:13.5px;
+    line-height:1.55;
+    color:#1a1a1a;
+    max-width:270px;
+    margin:0 auto;
+  }
+  .thanks-decor{
+    position:relative;
+    width:100%;
+    flex:1;
+    min-height:40px;
+  }
+  .thanks-sparkle{
+    position:absolute;
+    background:linear-gradient(160deg,#fff 0%,#cfd3d8 45%,#8b93a0 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));
+  }
+  .thanks-sparkle.s1{ font-size:48px; left:6%; bottom:6px; }
+  .thanks-sparkle.s2{ font-size:28px; left:26%; bottom:38px; }
+  .thanks-sparkle.heart{ font-size:46px; right:8%; bottom:14px; }
+  .thanks-footer{
+    margin-top:auto;
+    padding-top:6px;
+  }
+  .thanks-brand{
+    font-family:'Anton',sans-serif;
+    font-weight:400;
+    font-size:19px;
+    letter-spacing:1px;
+    color:#1a1a1a;
+    margin-bottom:6px;
+  }
+  .thanks-social{
+    font-size:12.5px;
+    line-height:1.6;
+    color:#1a1a1a;
   }
 </style>
 </head>
@@ -1901,48 +1982,25 @@ function ticketLine(label, valor){
 }
 
 function generarTicket(data){
-  const {nombre, count, piezasTicket, opcionElegida, opcionPrecio, encapsuladoCount, encapsuladoCosto, banoPlataCount, banoPlataCosto, tieneLlavero, costoLlavero, discoCount, total} = data;
-
-  let piezasHTML = '';
-  piezasTicket.forEach(p => {
-    piezasHTML += `
-      <div class="ticket-block">
-        Relicario ${p.idx} ${escapeHtml(p.acabado)} · Modelo ${escapeHtml(p.modelo)}${p.encap === 'Sí' ? ' · Encapsulado' : ''}<br>
-        ${escapeHtml(p.fotos)}
-      </div>`;
-  });
-
-  const incluyeHTML = opcionElegida.incluye.map(t => `· ${escapeHtml(t)}`).join('<br>');
+  const {nombre} = data;
 
   document.getElementById('ticketBox').innerHTML = `
-    <div class="ticket-tdc">TICKET<br>DE<br>COMPRA</div>
-    <img class="ticket-corner" src="${GRACIAS_BASE64}" alt="Gracias por tu compra">
-    <div class="ticket-header">
-      <div class="ticket-logo">
+    <div class="thanks-banner">
+      <img class="thanks-seal" src="${GRACIAS_BASE64}" alt="Gracias por tu compra">
+      <div class="thanks-logo">
         <img src="${LOGO_BASE64}" alt="La Vibe">
       </div>
-    </div>
-    <div class="ticket-block">
-      ✨ PEDIDO LAVIBEE.MX ✨<br>
-      Nombre: ${escapeHtml(nombre)}<br>
-      Número de piezas: ${count}
-    </div>
-    ${piezasHTML}
-    <div class="ticket-block">
-      Empaque: ${escapeHtml(opcionElegida.nombre)} — $${opcionPrecio} MXN<br>
-      ${incluyeHTML}
-    </div>
-    <div class="ticket-block">
-      ${ticketLine('Encapsulado' + (encapsuladoCount > 0 ? ' (x' + encapsuladoCount + ')' : ''), encapsuladoCount > 0 ? '$' + encapsuladoCosto + ' MXN' : 'N/A')}
-      ${banoPlataCount > 0 ? ticketLine('Cargo extra (x' + banoPlataCount + ')', '$' + banoPlataCosto + ' MXN') : ''}
-    </div>
-    ${tieneLlavero ? `<div class="ticket-block">Llaveros Kit Disco / Llavero mini CD — ${discoCount} pieza${discoCount>1?'s':''} ($${costoLlavero} MXN)</div>` : ''}
-    <div class="ticket-stars ticket-mono">************************************</div>
-    <div class="ticket-total ticket-mono">TOTAL $${total}.00 MXN</div>
-    <div class="ticket-stars ticket-mono">************************************</div>
-    <div class="ticket-footer">
-      <img class="ticket-visitus-img" src="${VISITUS_BASE64}" alt="Visit us">
-      <span class="ticket-mono">Facebook @Vibe Sweet<br>Instagram @lavibee.mx</span>
+      <div class="thanks-headline">¡Gracias por tu compra!</div>
+      <div class="thanks-message">Gracias por confiar en nuestro emprendimiento${nombre ? ', ' + escapeHtml(nombre) : ''}. Esperamos que disfrutes de tu pedido.</div>
+      <div class="thanks-decor">
+        <span class="thanks-sparkle s1">✦</span>
+        <span class="thanks-sparkle s2">✦</span>
+        <span class="thanks-sparkle heart">♥</span>
+      </div>
+      <div class="thanks-footer">
+        <div class="thanks-brand">LA VIBE</div>
+        <div class="thanks-social">Facebook @Vibe Sweet<br>Instagram @lavibee.mx</div>
+      </div>
     </div>
   `;
 
