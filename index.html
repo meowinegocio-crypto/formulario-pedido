@@ -16,7 +16,7 @@
   
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
   <style>
 
   :root{
@@ -34,7 +34,7 @@
   }
   *{box-sizing:border-box;}
   html{
-    background: linear-gradient(180deg, var(--peach) 0%, var(--rose) 30%, var(--babypink) 58%, var(--blush) 82%, var(--blushpale) 100%);
+    background: linear-gradient(180deg, var(--blushpale) 0%, var(--blush) 18%, var(--babypink) 42%, var(--rose) 70%, var(--peach) 100%);
   }
   body{
     margin:0;
@@ -42,7 +42,7 @@
     color:var(--ink);
     background:
       radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.35), transparent 60%),
-      linear-gradient(180deg, var(--peach) 0%, var(--rose) 30%, var(--babypink) 58%, var(--blush) 82%, var(--blushpale) 100%);
+      linear-gradient(180deg, var(--blushpale) 0%, var(--blush) 18%, var(--babypink) 42%, var(--rose) 70%, var(--peach) 100%);
     background-attachment: scroll;
     min-height:100vh;
   }
@@ -634,52 +634,71 @@
   /* TICKET - estilo postal / Canva */
   .ticket{
     position:relative;
-    background:#F7F2E4;
-    border:3px dashed var(--pink-hot);
-    border-radius:10px;
-    padding:26px 24px 24px;
+    background:#F7F1E3;
+    border:2.5px dashed var(--pink-hot);
+    border-radius:14px;
+    padding:22px 22px 18px;
     font-family:'Poppins',sans-serif;
     color:#1a1a1a;
-    font-size:13px;
-    line-height:1.5;
+    font-size:12.5px;
+    line-height:1.45;
     overflow:hidden;
   }
   .ticket-corner{
     position:absolute;
-    top:38px;
-    right:-34px;
+    top:34px;
+    right:-36px;
     transform:rotate(38deg);
     color:var(--pink-hot);
     font-weight:800;
-    font-size:11px;
+    font-size:10.5px;
     letter-spacing:2px;
     white-space:nowrap;
   }
+  .ticket-header{
+    text-align:center;
+    margin-bottom:6px;
+  }
   .ticket-logo{
     text-align:center;
-    margin-bottom:2px;
+    margin-bottom:0;
   }
   .ticket-logo img{
-    height:64px;
+    height:92px;
+  }
+  .ticket-brand{
+    font-family:'Playfair Display',serif;
+    font-weight:900;
+    font-size:22px;
+    letter-spacing:1px;
+    color:var(--magenta);
+    margin-top:-6px;
+  }
+  .ticket-tagline{
+    font-family:'Dancing Script',cursive;
+    font-weight:700;
+    font-size:16px;
+    color:var(--pink-hot);
+    margin-top:-4px;
   }
   .ticket-title{
     text-align:center;
     font-weight:800;
-    font-size:12.5px;
-    letter-spacing:1.5px;
-    margin:8px 0 14px;
+    font-size:11.5px;
+    letter-spacing:2px;
+    margin:10px 0 12px;
     color:#1a1a1a;
     text-transform:uppercase;
   }
   .ticket hr{
     border:none;
-    border-top:2px dashed var(--pink-hot);
-    margin:12px 0;
+    border-top:1.5px dashed var(--pink-hot);
+    margin:10px 0;
   }
   .ticket-block{
-    margin-bottom:12px;
-    padding-bottom:10px;
-    border-bottom:1.5px dashed #f0b8de;
+    margin-bottom:9px;
+    padding-bottom:9px;
+    border-bottom:1.3px dashed #e79cc4;
   }
   .ticket-block:last-of-type{
     border-bottom:none;
@@ -700,7 +719,7 @@
     text-align:center;
     font-weight:800;
     font-size:19px;
-    margin:14px 0;
+    margin:10px 0;
     letter-spacing:1px;
     color:#1a1a1a;
   }
@@ -712,7 +731,7 @@
   }
   .ticket-footer{
     text-align:center;
-    margin-top:16px;
+    margin-top:14px;
     font-size:11px;
     color:#4a4a4a;
   }
@@ -1898,8 +1917,12 @@ function generarTicket(data){
 
   document.getElementById('ticketBox').innerHTML = `
     <div class="ticket-corner">GRACIAS POR TU COMPRA</div>
-    <div class="ticket-logo">
-      <img src="${LOGO_BASE64}" alt="La Vibe">
+    <div class="ticket-header">
+      <div class="ticket-logo">
+        <img src="${LOGO_BASE64}" alt="La Vibe">
+      </div>
+      <div class="ticket-brand">LA VIBE</div>
+      <div class="ticket-tagline">cositas lindas</div>
     </div>
     <div class="ticket-title">Ticket de compra</div>
     <div class="ticket-block">
