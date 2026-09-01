@@ -20,6 +20,9 @@
   <style>
 
   :root{
+    --mexgreen:#9fdca9;
+    --mexcream:#fdf9f0;
+    --mexred:#ec9891;
     --mint:#e3f7b8;
     --cream:#f6efd2;
     --rose:#ffc1de;
@@ -35,15 +38,15 @@
   }
   *{box-sizing:border-box;}
   html{
-    background: linear-gradient(180deg, var(--mint) 0%, var(--cream) 12%, var(--babypink) 45%, var(--rose) 100%);
+    background: linear-gradient(90deg, var(--mexgreen) 0%, var(--mexgreen) 28%, var(--mexcream) 38%, var(--mexcream) 62%, var(--mexred) 72%, var(--mexred) 100%);
   }
   body{
     margin:0;
     font-family:'Poppins',sans-serif;
     color:var(--ink);
     background:
-      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.3), transparent 60%),
-      linear-gradient(180deg, var(--mint) 0%, var(--cream) 12%, var(--babypink) 45%, var(--rose) 100%);
+      radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.25), transparent 60%),
+      linear-gradient(90deg, var(--mexgreen) 0%, var(--mexgreen) 28%, var(--mexcream) 38%, var(--mexcream) 62%, var(--mexred) 72%, var(--mexred) 100%);
     background-attachment: scroll;
     min-height:100vh;
   }
@@ -754,6 +757,33 @@
   </div>
 </div>
 
+<div class="papel-picado" aria-hidden="true">
+  <svg viewBox="0 0 800 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <polygon points="0,0 40,0 20,50" fill="#9fdca9"/>
+      <polygon points="40,0 80,0 60,50" fill="#fdf9f0"/>
+      <polygon points="80,0 120,0 100,50" fill="#ec9891"/>
+      <polygon points="120,0 160,0 140,50" fill="#ffc1de"/>
+      <polygon points="160,0 200,0 180,50" fill="#9fdca9"/>
+      <polygon points="200,0 240,0 220,50" fill="#fdf9f0"/>
+      <polygon points="240,0 280,0 260,50" fill="#ec9891"/>
+      <polygon points="280,0 320,0 300,50" fill="#ffc1de"/>
+      <polygon points="320,0 360,0 340,50" fill="#9fdca9"/>
+      <polygon points="360,0 400,0 380,50" fill="#fdf9f0"/>
+      <polygon points="400,0 440,0 420,50" fill="#ec9891"/>
+      <polygon points="440,0 480,0 460,50" fill="#ffc1de"/>
+      <polygon points="480,0 520,0 500,50" fill="#9fdca9"/>
+      <polygon points="520,0 560,0 540,50" fill="#fdf9f0"/>
+      <polygon points="560,0 600,0 580,50" fill="#ec9891"/>
+      <polygon points="600,0 640,0 620,50" fill="#ffc1de"/>
+      <polygon points="640,0 680,0 660,50" fill="#9fdca9"/>
+      <polygon points="680,0 720,0 700,50" fill="#fdf9f0"/>
+      <polygon points="720,0 760,0 740,50" fill="#ec9891"/>
+      <polygon points="760,0 800,0 780,50" fill="#ffc1de"/>
+    </g>
+  </svg>
+</div>
+
 <div class="wrap">
 <div class="main-col">
 
@@ -773,6 +803,7 @@
       </svg>
     </div>
     <div class="hero-inner">
+      <div class="viva-mexico">🇲🇽 ¡Viva México! · 15 de septiembre</div>
       <div class="eyebrow">Realiza tu pedido aqui</div>
     <img src="Logo.png" alt="Lavibee Logo" style="width: 220px; max-width: 78%; margin: 15px auto; display: block; filter: drop-shadow(0 8px 20px rgba(150,20,120,.25));">
       <div class="subtitle">Checa nuestros precios y paquetes</div>
