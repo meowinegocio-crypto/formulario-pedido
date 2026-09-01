@@ -1596,36 +1596,55 @@ function construirHTMLEtiqueta(nombre, direccion, referencias, telefono){
 }
 
 // Genera la etiqueta como imagen (PNG en base64) usando html2canvas. Devuelve una Promise.
+// NUNCA rechaza (usa try/catch): si algo falla (ej. html2canvas no cargó), resuelve null
+// en vez de tumbar todo el proceso de envío del pedido.
 function generarEtiquetaImagen(nombre, direccion, referencias, telefono){
   return new Promise((resolve) => {
-    const host = document.createElement('div');
-    host.style.position = 'fixed';
-    host.style.left = '-9999px';
-    host.style.top = '0';
-    host.innerHTML = construirHTMLEtiqueta(nombre, direccion, referencias, telefono);
-    document.body.appendChild(host);
+    try {
+      const host = document.createElement('div');
+      host.style.position = 'fixed';
+      host.style.left = '-9999px';
+      host.style.top = '0';
+      host.innerHTML = construirHTMLEtiqueta(nombre, direccion, referencias, telefono);
+      document.body.appendChild(host);
 
-    // Pequeña espera para asegurar que el logo (base64) ya esté pintado antes de capturar
-    setTimeout(() => {
-      html2canvas(host.firstElementChild, {backgroundColor:'#FFF6FA', scale:2, useCORS:true}).then(canvas => {
-        const dataUrl = canvas.toDataURL('image/png');
-        document.body.removeChild(host);
-        resolve(dataUrl);
-      }).catch(() => {
-        document.body.removeChild(host);
-        resolve(null);
-      });
-    }, 150);
+      // Pequeña espera para asegurar que el logo (base64) ya esté pintado antes de capturar
+      setTimeout(() => {
+        try {
+          html2canvas(host.firstElementChild, {backgroundColor:'#FFF6FA', scale:2, useCORS:true}).then(canvas => {
+            const dataUrl = canvas.toDataURL('image/png');
+            document.body.removeChild(host);
+            resolve(dataUrl);
+          }).catch(() => {
+            document.body.removeChild(host);
+            resolve(null);
+          });
+        } catch(err) {
+          console.error('Error generando etiqueta (html2canvas no disponible):', err);
+          if(host.parentNode) document.body.removeChild(host);
+          resolve(null);
+        }
+      }, 150);
+    } catch(err) {
+      console.error('Error preparando etiqueta:', err);
+      resolve(null);
+    }
   });
 }
   
 // Convierte el ticket ya generado (#ticketBox) en imagen PNG base64. Devuelve una Promise.
+// NUNCA rechaza: si algo falla, resuelve null en vez de tumbar todo el proceso de envío.
 function generarTicketImagen(){
   return new Promise((resolve) => {
-    const ticket = document.getElementById('ticketBox');
-    html2canvas(ticket, {backgroundColor:'#F7F2E4', scale:2}).then(canvas => {
-      resolve(canvas.toDataURL('image/png'));
-    }).catch(() => resolve(null));
+    try {
+      const ticket = document.getElementById('ticketBox');
+      html2canvas(ticket, {backgroundColor:'#F7F2E4', scale:2}).then(canvas => {
+        resolve(canvas.toDataURL('image/png'));
+      }).catch(() => resolve(null));
+    } catch(err) {
+      console.error('Error generando ticket (html2canvas no disponible):', err);
+      resolve(null);
+    }
   });
 }
 
@@ -1847,9 +1866,20 @@ Entrega: ${entregaTxt}`;
     });
   }
 
-  // === Aviso automático a mí (dueña) cuando el pedido es por Didi ===
-  if(entregaInput.value === 'Entrega con Didi'){
-    const avisoTexto =
+  // === Ticket + etiqueta primero (así no se interrumpen si el navegador cambia a WhatsApp) ===
+  // Siempre se genera el ticket como imagen; la etiqueta solo si es Didi.
+  // Ambas (las que apliquen) se mandan juntas en el mismo correo.
+  // IMPORTANTE: si por cualquier motivo falla la generación de las imágenes (ej. la librería
+  // externa html2canvas no cargó a tiempo por mala conexión o un bloqueador), el pedido se
+  // registra IGUAL en Sheets/Gmail, solo que sin las imágenes adjuntas. Así nunca se pierde
+  // un pedido en silencio.
+  function finalizarPedido(ticketImgBase64, etiquetaImgBase64){
+    registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal, etiquetaImgBase64, ticketImgBase64);
+
+    // === Aviso automático a mí (dueña) cuando el pedido es por Didi ===
+    // Se abre HASTA AL FINAL, ya que el ticket/etiqueta se generaron (o se intentaron) y el correo se mandó.
+    if(entregaInput.value === 'Entrega con Didi'){
+      const avisoTexto =
 `🛵 NUEVO PEDIDO CON DIDI 🛵
 
 PARA: ${nombre}
@@ -1861,18 +1891,22 @@ ${resumenRaw}
 TOTAL: $${total} MXN
 Forma de pago: ${formaPagoVal}`;
 
-    const waAvisoUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(avisoTexto)}`;
-    // Se abre en una pestaña nueva automáticamente para que llegue directo a tu WhatsApp
-    window.open(waAvisoUrl, '_blank');
+      const waAvisoUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(avisoTexto)}`;
+      // Se abre en una pestaña nueva automáticamente para que llegue directo a tu WhatsApp
+      window.open(waAvisoUrl, '_blank');
+    }
   }
 
-  // Siempre se genera el ticket como imagen; la etiqueta solo si es Didi.
-  // Ambas (las que apliquen) se mandan juntas en el mismo correo.
   Promise.all([
     generarTicketImagen(),
     entregaInput.value === 'Entrega con Didi' ? generarEtiquetaImagen(nombre, direccion, referencias, telefono) : Promise.resolve(null)
   ]).then(([ticketImgBase64, etiquetaImgBase64]) => {
-    registrarVentas(itemsVenta, nombre, entregaTxt, formaPagoVal, etiquetaImgBase64, ticketImgBase64);
+    finalizarPedido(ticketImgBase64, etiquetaImgBase64);
+  }).catch((err) => {
+    // Algo falló generando las imágenes (ej. html2canvas no cargó). Registramos el pedido
+    // de todas formas, sin imágenes, para que NUNCA se pierda en silencio.
+    console.error('No se pudieron generar ticket/etiqueta, se registra el pedido sin imágenes:', err);
+    finalizarPedido(null, null);
   });
   // === Fin registro automático + aviso ===
 
